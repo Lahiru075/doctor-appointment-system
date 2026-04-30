@@ -1,0 +1,21 @@
+spring.application.name=doctor_appointment_system_be
+
+# Database Connection (PostgreSQL)
+spring.datasource.url=jdbc:postgresql://localhost:5432/doctor_appointment_db
+spring.datasource.username=postgres
+spring.datasource.password=
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate Settings
+# auto-generate tables
+spring.jpa.hibernate.ddl-auto=update
+# show database queries on to the terminal
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Server Port
+server.port=8080
+
+# JSON format settings
+spring.jackson.serialization.indent_output=true
