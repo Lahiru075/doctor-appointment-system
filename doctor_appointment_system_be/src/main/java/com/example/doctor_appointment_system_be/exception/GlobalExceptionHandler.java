@@ -16,6 +16,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // meka multi purpose tool ekak wge.. oni thenkt use krnn puluwn..
     @ExceptionHandler(APIException.class)
     public ResponseEntity<ApiResponse<Object>> handleApiException(APIException e){
         ApiResponse<Object> response = ApiResponse.builder()
