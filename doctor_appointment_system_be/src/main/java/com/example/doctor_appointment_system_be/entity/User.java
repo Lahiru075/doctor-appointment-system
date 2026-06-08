@@ -40,4 +40,12 @@ public class User {
     protected void onCreate(){
         createAt = LocalDateTime.now();
     }
+
+    // one-to-one relationships
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Patient patient;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Doctor doctor;
 }
