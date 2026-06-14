@@ -15,7 +15,7 @@ export const register = async (data: RegisterDataType) => {
 }
 
 export const getMyDetails = async () => {
-    const res = await api.get('/users/getMyDetails')
+    const res = await api.get('/users/me')
     return res.data
 }
 
