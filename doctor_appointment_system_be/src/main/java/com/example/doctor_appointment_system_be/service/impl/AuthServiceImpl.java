@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterDTO registerDTO) {
 
-        if (userRepository.existsByEmail(registerDTO.getEmail())){
+        if (userRepository.existsByEmail(registerDTO.getEmail())) {
             throw new APIException(HttpStatus.CONFLICT, "Email is already in use");
         }
 
@@ -90,5 +91,38 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) {
+        try {
+
+            String email = jwtUtil.extractRefreshUsername(refreshToken);
+
+            if (email == null) {
+                throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid or Expire refresh token");
+            }
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new APIException(HttpStatus.UNAUTHORIZED, "Can not find User"));
+
+            UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                    .username(user.getEmail())
+                    .password(user.getPassword())
+                    .authorities("ROLE_" + user.getRole().name())
+                    .build();
+
+            if (!jwtUtil.isRefreshTokenValid(refreshToken, userDetails)) {
+                throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid or Expire refresh token");
+            }
+
+            String newAccessToken = jwtUtil.generateAccessToken(user);
+
+            return newAccessToken;
+
+        } catch (Exception e) {
+            throw new APIException(org.springframework.http.HttpStatus.UNAUTHORIZED, "An issue occurred while verifying the refresh token: " + e.getMessage());
+        }
+
     }
 }
