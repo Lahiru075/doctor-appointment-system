@@ -9,8 +9,18 @@ type RegisterDataType = {
     medicalHistory?: string
 }
 
+type LoginDataType = {
+    email: string,
+    password: string
+}
+
 export const register = async (data: RegisterDataType) => {
     const res = await api.post("/users/register", data)
+    return res.data
+}
+
+export const signin = async (data: LoginDataType) => {
+    const res = await api.post("/users/login", data)
     return res.data
 }
 

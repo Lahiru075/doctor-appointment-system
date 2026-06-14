@@ -23,6 +23,8 @@ public class Doctor {
     @Column(nullable = false)
     private Double consultationFee;
 
+    private Integer experienceYears;
+
     // One-to-one relationships
 
     @OneToOne(fetch = FetchType.LAZY)

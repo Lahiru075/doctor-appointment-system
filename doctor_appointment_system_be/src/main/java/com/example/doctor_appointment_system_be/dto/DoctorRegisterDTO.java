@@ -23,6 +23,9 @@ public class DoctorRegisterDTO {
 
     private String phoneNumber;
 
+    @NotNull(message = "Experience years is required")
+    private Integer experienceYears;
+
     @NotNull(message = "Specialization ID is required")
     private Long specializationId;
 

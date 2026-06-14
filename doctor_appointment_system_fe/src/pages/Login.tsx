@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { motion } from 'motion/react';
 import { Mail, Lock, LogIn, AlertCircle, Sparkles } from 'lucide-react';
+import { signin } from '../services/user'; 
+import { getMyDetails } from '../services/user'; 
 
 interface ErrorState {
   email?: string;
@@ -11,20 +13,15 @@ interface ErrorState {
 }
 
 const Login = () => {
-  const { login, isAuthenticated, userRole } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // Basic Form States
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // Interaction/UX States
   const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
-
-  // set the redirect path after login, default to dashboard if already authenticated
-  const from = location.state?.from?.pathname || '';
 
   const getDashboardRedirect = (role: string) => {
     switch (role) {
@@ -38,12 +35,12 @@ const Login = () => {
     }
   };
 
-  // If already authenticated, redirect to the appropriate dashboard
+  // If user is already logged in, redirect to their dashboard
   useEffect(() => {
-    if (isAuthenticated && userRole) {
-      navigate(getDashboardRedirect(userRole), { replace: true });
+    if (user) {
+      navigate(getDashboardRedirect(user.role), { replace: true });
     }
-  }, [isAuthenticated, userRole, navigate]);
+  }, [user, navigate]);
 
   const validateForm = (): boolean => {
     const tempErrors: ErrorState = {};
@@ -78,14 +75,18 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await login({ email, password });
-      if (response.success) {
-        // Redirect to the appropriate dashboard based on role or the 'from' path
-        const dest = from || getDashboardRedirect(response.data.role);
-        navigate(dest, { replace: true });
-      } else {
-        setErrors({ general: response.message || 'Login failed. Please verify your credentials.' });
-      }
+
+      const response: any = await signin({ email, password });
+      
+   
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+
+      const details = await getMyDetails();
+      setUser(details.data);
+
+      navigate(getDashboardRedirect(details.data.role), { replace: true });
+
     } catch (err: any) {
       console.error('Login action encountered error:', err);
       

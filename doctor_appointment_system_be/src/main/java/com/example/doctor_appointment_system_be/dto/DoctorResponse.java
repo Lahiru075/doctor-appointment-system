@@ -12,6 +12,7 @@ public class DoctorResponse {
     private Long userId;
     private String fullName;
     private String email;
+    private Integer experienceYears;
     private String specializationName;
     private Double consultationFee;
     private String biography;

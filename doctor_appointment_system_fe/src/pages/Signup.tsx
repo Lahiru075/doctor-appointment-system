@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { motion } from 'motion/react';
 import { User, Mail, Lock, Phone, HeartPulse, Activity, AlertCircle, UserPlus } from 'lucide-react';
-import { register } from '../services/user';
+import { register } from '../services/user'; 
+import { getMyDetails } from '../services/user'; 
 
 interface ErrorState {
   fullName?: string;
@@ -14,7 +15,8 @@ interface ErrorState {
 }
 
 const Register = () => {
-  const { isAuthenticated, userRole } = useAuth();
+
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   // Inputs
@@ -29,12 +31,12 @@ const Register = () => {
   const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already authenticated, redirect to appropriate dashboard
-  React.useEffect(() => {
-    if (isAuthenticated && userRole) {
-      navigate(userRole === 'ADMIN' ? '/admin/dashboard' : userRole === 'DOCTOR' ? '/doctor/dashboard' : '/patient/dashboard', { replace: true });
+  useEffect(() => {
+    if (user) {
+      const redirectPath = user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'DOCTOR' ? '/doctor/dashboard' : '/patient/dashboard';
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, userRole, navigate]);
+  }, [user, navigate]);
 
   const validateForm = (): boolean => {
     const tempErrors: ErrorState = {};
@@ -79,7 +81,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-   
+
       const response = await register({
         fullName,
         email,
@@ -90,6 +92,13 @@ const Register = () => {
       });
 
       if (response.success) {
+      
+        localStorage.setItem("accessToken", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+
+        const details = await getMyDetails();
+        setUser(details.data);
+
         navigate('/patient/dashboard', { replace: true });
       } else {
         setErrors({ general: response.message || 'Registration failed.' });

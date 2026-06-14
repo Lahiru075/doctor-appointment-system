@@ -6,6 +6,7 @@ import { useAuth } from '../context/authContext'
 
 const Login = lazy(() => import('../pages/Login'))
 const Register = lazy(() => import('../pages/Signup'))
+const Landing = lazy(() => import('../pages/Landing'))
 
 type RequireAuthType = { children: ReactNode, role?: string[] }
 
@@ -69,7 +70,8 @@ function index() {
                 </div>
             }>
                 <Routes>
-                    <Route path="/" element={<Login />} />
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                 </Routes>
             </Suspense>
