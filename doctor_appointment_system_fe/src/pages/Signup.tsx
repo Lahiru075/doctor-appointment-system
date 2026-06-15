@@ -16,7 +16,6 @@ interface ErrorState {
 
 const Register = () => {
 
-  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   // Inputs
@@ -31,12 +30,6 @@ const Register = () => {
   const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      const redirectPath = user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'DOCTOR' ? '/doctor/dashboard' : '/patient/dashboard';
-      navigate(redirectPath, { replace: true });
-    }
-  }, [user, navigate]);
 
   const validateForm = (): boolean => {
     const tempErrors: ErrorState = {};
@@ -92,14 +85,7 @@ const Register = () => {
       });
 
       if (response.success) {
-      
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-
-        const details = await getMyDetails();
-        setUser(details.data);
-
-        navigate('/patient/dashboard', { replace: true });
+        navigate('/login', { replace: true });
       } else {
         setErrors({ general: response.message || 'Registration failed.' });
       }

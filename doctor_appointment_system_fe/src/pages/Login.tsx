@@ -31,7 +31,7 @@ const Login = () => {
         return '/doctor/dashboard';
       case 'PATIENT':
       default:
-        return '/patient/dashboard';
+        return '/patient-dashboard';
     }
   };
 
