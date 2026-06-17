@@ -28,7 +28,7 @@ const Login = () => {
       case 'ADMIN':
         return '/admin/dashboard';
       case 'DOCTOR':
-        return '/doctor/dashboard';
+        return '/doctor-dashboard';
       case 'PATIENT':
       default:
         return '/patient-dashboard';

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
-import { Heart, LogOut, Activity, Stethoscope, Calendar, Clipboard, Menu, X } from 'lucide-react';
+import { HeartPulse, LogOut, Users, Calendar, Star, User, Menu, X } from 'lucide-react';
 
-export default function Sidebar() {
+const DoctorSidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+
   const navigationItems = [
-    { path: '/patient-dashboard', label: 'Overview', icon: Activity },
-    { path: '/patient-book', label: 'Book Appointment', icon: Stethoscope },
-    { path: '/patient-appointments', label: 'My Appointments', icon: Calendar },
-    { path: '/patient-prescriptions', label: 'Prescriptions', icon: Clipboard },
+    { path: '/doctor-dashboard', label: 'Waiting Queue', icon: Users },
+    { path: '/doctor/appointments', label: 'Referral Approvals', icon: Calendar },
+    { path: '/doctor/availability', label: 'Manage Slots', icon: Calendar },
+    { path: '/doctor/reviews', label: 'My Reviews', icon: Star },
+    { path: '/doctor/profile', label: 'Profile Setup', icon: User }
   ];
 
   return (
@@ -23,16 +25,16 @@ export default function Sidebar() {
           {/* CliniQ Logo */}
           <div className="flex items-center space-x-3 py-2">
             <div className="p-2.5 bg-[#e3edf2] text-[#082e3e] rounded-2xl border border-white shadow-2xs">
-              <Heart className="w-5 h-5 text-[#0a4053] animate-pulse" />
+              <HeartPulse className="w-5 h-5 text-[#0a4053]" />
             </div>
             <div>
               <span className="font-black text-xl tracking-tight text-[#082e3e] block leading-none">Clini<span className="text-[#86abc0]">Q</span></span>
-              <span className="text-[10px] uppercase tracking-widest text-[#8eb5ca] font-extrabold mt-1 block">Patient Portal</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#8eb5ca] font-extrabold mt-1 block">Professional Portal</span>
             </div>
           </div>
 
           <div className="bg-[#f4f8fa] border border-slate-200/20 rounded-2xl p-3.5 text-center space-y-1">
-            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Patient Identity</span>
+            <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">MD Identity</span>
             <span className="text-xs font-extrabold text-[#082e3e] block truncate">{user?.email}</span>
             <span className="inline-block bg-[#082e3e] text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
               {user?.role}
@@ -43,12 +45,12 @@ export default function Sidebar() {
           <nav className="space-y-1 pt-2">
             {navigationItems.map(item => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path; 
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border ${
+                  className={`flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border cursor-pointer ${
                     isActive 
                       ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-sm shadow-[#082e3e]/10' 
                       : 'text-slate-600 hover:bg-slate-50 border-transparent hover:text-[#082e3e]'
@@ -78,7 +80,7 @@ export default function Sidebar() {
       <nav className="md:hidden bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 px-6 py-4 flex justify-between items-center w-full">
         <div className="flex items-center space-x-2.5">
           <div className="p-2 bg-[#e3edf2] text-[#082e3e] rounded-xl border border-white">
-            <Heart className="w-4 h-4 text-[#0a4053] animate-pulse" />
+            <HeartPulse className="w-4 h-4 text-[#0a4053]" />
           </div>
           <span className="font-black text-lg tracking-tight text-[#082e3e]">Clini<span className="text-[#86abc0]">Q</span></span>
         </div>
@@ -90,7 +92,7 @@ export default function Sidebar() {
         </button>
       </nav>
 
-      {/* Mobile Sidebar Sliding Tray */}
+      {/* Mobile Sidebar Sliding Drawer */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 md:hidden" onClick={() => setIsSidebarOpen(false)}>
           <div 
@@ -101,7 +103,7 @@ export default function Sidebar() {
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center space-x-2.5">
                   <div className="p-2 bg-[#e3edf2] text-[#082e3e] rounded-xl border border-white">
-                    <Heart className="w-4 h-4 text-[#0a4053] animate-pulse" />
+                    <HeartPulse className="w-4 h-4 text-[#0a4053]" />
                   </div>
                   <span className="font-extrabold text-[#082e3e] text-lg">Clini<span className="text-[#86abc0]">Q</span></span>
                 </div>
@@ -128,7 +130,7 @@ export default function Sidebar() {
                           : 'text-slate-600 hover:bg-slate-50 border-transparent hover:text-[#082e3e]'
                       }`}
                     >
-                      <Icon className="w-4.5 h-4.5" />
+                      <Icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -151,3 +153,5 @@ export default function Sidebar() {
     </>
   );
 }
+
+export default DoctorSidebar;

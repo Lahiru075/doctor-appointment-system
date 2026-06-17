@@ -2,12 +2,14 @@ import { lazy, Suspense, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../context/authContext'
 import PatientLayout from '../components/PatientLayout'
+import DoctorLayout from '../components/DoctorLayout'
 
 
 const Login = lazy(() => import('../pages/Login'))
 const Register = lazy(() => import('../pages/Signup'))
 const Landing = lazy(() => import('../pages/Landing'))
 const Patientdashboard = lazy(() => import('../pages/PatientDashboard'))
+const DoctorDashboard = lazy(() => import('../pages/DoctorDashboard'))
 
 type RequireAuthType = { children: ReactNode, role?: string[] }
 
@@ -75,7 +77,6 @@ function index() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
 
-
                     <Route element={<RequireAuth><PatientLayout /></RequireAuth>}>
                         <Route
                             path="/patient-dashboard"
@@ -87,7 +88,16 @@ function index() {
                         />
                     </Route>
 
-
+                    <Route element={<RequireAuth><DoctorLayout /></RequireAuth>}>
+                        <Route
+                            path="/doctor-dashboard"
+                            element={
+                                <RequireAuth role={['DOCTOR']}>
+                                    <DoctorDashboard />
+                                </RequireAuth>
+                            }
+                        />
+                    </Route>
 
                 </Routes>
             </Suspense>

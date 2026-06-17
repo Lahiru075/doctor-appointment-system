@@ -1,24 +1,28 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Sidebar from './PatientSidebar';
+import DoctorSidebar from '../components/DoctorSidebar'; 
 
-const PatientLayout = () => {
+const DoctorLayout = () => {
   const location = useLocation();
 
   const getHeaderTitle = (pathname: string) => {
-    if (pathname.includes('/patient/book')) return 'Schedule Specialist Session';
-    if (pathname.includes('/patient/appointments')) return 'Personal Outpatient Queue';
-    if (pathname.includes('/patient/prescriptions')) return 'Authorized Care Plan & Prescriptions';
-    return 'Health Diagnostics Overview'; // Default
+    if (pathname.includes('/doctor/appointments')) return 'Pending Referrals & Approvals';
+    if (pathname.includes('/doctor/availability')) return 'Manage Time Slots & Availability';
+    if (pathname.includes('/doctor/reviews')) return 'Patient Ratings & Reviews';
+    if (pathname.includes('/doctor/profile')) return 'Professional Profile Management';
+    return 'Clinical Waiting Queue Overview'; // Default
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#abc9d8]/50 via-[#f0f5f8] to-white text-[#082e3e] flex flex-col md:flex-row font-sans relative antialiased">
       
-      <Sidebar />
+      {/* 1. Doctor Sidebar */}
+      <DoctorSidebar />
 
+      {/* 2. Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#f8fafc]">
-
+        
+        {/* Sticky Header */}
         <header className="bg-white/60 backdrop-blur-md border-b border-slate-200/20 px-6 py-4.5 hidden md:flex justify-between items-center sticky top-0 z-20">
           <div>
             <h1 className="text-lg font-black text-[#082e3e]">
@@ -43,4 +47,4 @@ const PatientLayout = () => {
   );
 }
 
-export default PatientLayout;
+export default DoctorLayout;
