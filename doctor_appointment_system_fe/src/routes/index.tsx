@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../context/authContext'
 import PatientLayout from '../components/PatientLayout'
 import DoctorLayout from '../components/DoctorLayout'
+import AdminLayout from '../components/AdminLayout'
 
 
 const Login = lazy(() => import('../pages/Login'))
@@ -10,6 +11,7 @@ const Register = lazy(() => import('../pages/Signup'))
 const Landing = lazy(() => import('../pages/Landing'))
 const Patientdashboard = lazy(() => import('../pages/PatientDashboard'))
 const DoctorDashboard = lazy(() => import('../pages/DoctorDashboard'))
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'))
 
 type RequireAuthType = { children: ReactNode, role?: string[] }
 
@@ -94,6 +96,17 @@ function index() {
                             element={
                                 <RequireAuth role={['DOCTOR']}>
                                     <DoctorDashboard />
+                                </RequireAuth>
+                            }
+                        />
+                    </Route>
+
+                    <Route element={<RequireAuth><AdminLayout /></RequireAuth>}>
+                        <Route
+                            path="/admin-dashboard"
+                            element={
+                                <RequireAuth role={['ADMIN']}>
+                                    <AdminDashboard />
                                 </RequireAuth>
                             }
                         />

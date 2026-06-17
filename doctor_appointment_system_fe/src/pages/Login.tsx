@@ -26,7 +26,7 @@ const Login = () => {
   const getDashboardRedirect = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return '/admin/dashboard';
+        return '/admin-dashboard';
       case 'DOCTOR':
         return '/doctor-dashboard';
       case 'PATIENT':
