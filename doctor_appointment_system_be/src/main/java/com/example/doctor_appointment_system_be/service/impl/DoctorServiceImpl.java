@@ -1,7 +1,7 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
 import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorResponse;
+import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Doctor;
 import com.example.doctor_appointment_system_be.entity.Specialization;
 import com.example.doctor_appointment_system_be.entity.User;
@@ -27,7 +27,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     @Transactional
-    public DoctorResponse registerDoctor(DoctorRegisterDTO doctorRegisterDTO) {
+    public DoctorResponseDTO registerDoctor(DoctorRegisterDTO doctorRegisterDTO) {
 
         if (userRepository.existsByEmail(doctorRegisterDTO.getEmail())) {
             throw new IllegalArgumentException("Email is already in use!");
@@ -55,7 +55,7 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
-        return DoctorResponse.builder()
+        return DoctorResponseDTO.builder()
                 .doctorId(savedDoctor.getId())
                 .userId(savedDoctor.getUser().getId())
                 .fullName(savedDoctor.getUser().getFullName())

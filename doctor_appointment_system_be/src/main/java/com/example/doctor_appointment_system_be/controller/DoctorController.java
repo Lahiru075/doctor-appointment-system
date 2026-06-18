@@ -2,7 +2,7 @@ package com.example.doctor_appointment_system_be.controller;
 
 import com.example.doctor_appointment_system_be.dto.ApiResponse;
 import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorResponse;
+import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
 import com.example.doctor_appointment_system_be.service.DoctorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +25,11 @@ public class DoctorController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<DoctorResponse>> registerDoctor(@Valid @RequestBody DoctorRegisterDTO doctorRegisterDTO) {
+    public ResponseEntity<ApiResponse<DoctorResponseDTO>> registerDoctor(@Valid @RequestBody DoctorRegisterDTO doctorRegisterDTO) {
 
-        DoctorResponse response = doctorService.registerDoctor(doctorRegisterDTO);
+        DoctorResponseDTO response = doctorService.registerDoctor(doctorRegisterDTO);
 
-        ApiResponse<DoctorResponse> apiResponse = ApiResponse.<DoctorResponse>builder()
+        ApiResponse<DoctorResponseDTO> apiResponse = ApiResponse.<DoctorResponseDTO>builder()
                 .success(true)
                 .status(HttpStatus.CREATED.value())
                 .message("Doctor registered successfully!")

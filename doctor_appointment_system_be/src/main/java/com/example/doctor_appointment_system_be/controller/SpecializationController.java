@@ -2,9 +2,8 @@ package com.example.doctor_appointment_system_be.controller;
 
 import com.example.doctor_appointment_system_be.dto.ApiResponse;
 import com.example.doctor_appointment_system_be.dto.SpecializationDTO;
-import com.example.doctor_appointment_system_be.entity.Specialization;
+import com.example.doctor_appointment_system_be.dto.SpecializationResponseDTO;
 import com.example.doctor_appointment_system_be.service.SpecializationService;
-import jakarta.persistence.PrePersist;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,11 +23,11 @@ public class SpecializationController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Specialization>> createSpecialization(@Valid @RequestBody SpecializationDTO specializationDTO) {
+    public ResponseEntity<ApiResponse<SpecializationResponseDTO>> createSpecialization(@Valid @RequestBody SpecializationDTO specializationDTO) {
 
-        Specialization response = specializationService.createSpecialization(specializationDTO);
+        SpecializationResponseDTO response = specializationService.createSpecialization(specializationDTO);
 
-        ApiResponse<Specialization> apiResponse = ApiResponse.<Specialization>builder()
+        ApiResponse<SpecializationResponseDTO> apiResponse = ApiResponse.<SpecializationResponseDTO>builder()
                 .success(true)
                 .status(HttpStatus.CREATED.value())
                 .message("Specialization created successfully!")
@@ -39,12 +38,49 @@ public class SpecializationController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<SpecializationResponseDTO>> updateSpecialization(
+            @PathVariable Long id ,
+            @Valid @RequestBody SpecializationDTO specializationDTO
+    ){
+
+        SpecializationResponseDTO response = specializationService.updateSpecialization(id, specializationDTO);
+
+        ApiResponse<SpecializationResponseDTO> apiResponse = ApiResponse.<SpecializationResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Specialization update successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteSpecialization(@PathVariable Long id){
+
+        specializationService.deleteSpecialization(id);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Specialization delete successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Specialization>>> getAllSpecializations() {
+    public ResponseEntity<ApiResponse<List<SpecializationResponseDTO>>> getAllSpecializations() {
 
-        List<Specialization> response = specializationService.getAllSpecializations();
+        List<SpecializationResponseDTO> response = specializationService.getAllSpecializations();
 
-        ApiResponse<List<Specialization>> apiResponse = ApiResponse.<List<Specialization>>builder()
+        ApiResponse<List<SpecializationResponseDTO>> apiResponse = ApiResponse.<List<SpecializationResponseDTO>>builder()
                 .success(true)
                 .status(HttpStatus.OK.value())
                 .message("Specializations retrieved successfully!")
