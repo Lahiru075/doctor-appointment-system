@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
+
         return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())

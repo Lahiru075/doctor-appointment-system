@@ -16,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class DoctorServiceImpl implements DoctorService {
@@ -65,4 +68,32 @@ public class DoctorServiceImpl implements DoctorService {
                 .consultationFee(savedDoctor.getConsultationFee())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DoctorResponseDTO> getAll() {
+        return doctorRepository.findAllDoctors().stream()
+                .map(s -> new DoctorResponseDTO(
+                        s.getId(),
+                        s.getUser().getId(),
+                        s.getUser().getFullName(),
+                        s.getUser().getEmail(),
+                        s.getExperienceYears(),
+                        s.getSpecialization() != null ? s.getSpecialization().getName() : "N/A",
+                        s.getConsultationFee(),
+                        s.getBiography()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional // if we use this.. we do not want (doctorRepository.save(doctor)) this update when transaction commit
+    public void updateDoctorStatus(Long id) {
+
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+
+        doctor.getUser().setActive(!doctor.getUser().isActive());
+    }
+
 }

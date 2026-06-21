@@ -1,6 +1,9 @@
 package com.example.doctor_appointment_system_be.dto;
 
+import com.example.doctor_appointment_system_be.entity.Appointment;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,4 +19,5 @@ public class DoctorResponseDTO {
     private String specializationName;
     private Double consultationFee;
     private String biography;
+
 }

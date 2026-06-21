@@ -36,9 +36,12 @@ public class User {
 
     private LocalDateTime createAt;
 
+    private boolean isActive = true;
+
     @PrePersist
     protected void onCreate(){
         createAt = LocalDateTime.now();
+        isActive = true;
     }
 
     // one-to-one relationships

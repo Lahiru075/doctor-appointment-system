@@ -33,7 +33,7 @@ public class ApplicationConfig {
                 .map(user -> new User(
                         user.getEmail(),
                         user.getPassword(),
-                        true, // enabled
+                        user.isActive(), // enabled
                         true, // accountNonExpired
                         true, // credentialsNonExpired
                         true, // accountNonLocked

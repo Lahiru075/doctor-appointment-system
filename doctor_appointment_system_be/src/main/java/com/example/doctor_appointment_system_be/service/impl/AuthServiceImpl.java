@@ -1,8 +1,9 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
-import com.example.doctor_appointment_system_be.dto.AuthResponse;
+import com.example.doctor_appointment_system_be.dto.LoginResponse;
 import com.example.doctor_appointment_system_be.dto.LoginDTO;
 import com.example.doctor_appointment_system_be.dto.RegisterDTO;
+import com.example.doctor_appointment_system_be.dto.RegisterResponse;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.User;
 import com.example.doctor_appointment_system_be.enums.Role;
@@ -15,6 +16,7 @@ import com.example.doctor_appointment_system_be.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse register(RegisterDTO registerDTO) {
+    public RegisterResponse register(RegisterDTO registerDTO) {
 
         if (userRepository.existsByEmail(registerDTO.getEmail())) {
             throw new APIException(HttpStatus.CONFLICT, "Email is already in use");
@@ -59,14 +61,14 @@ public class AuthServiceImpl implements AuthService {
         // then save patient to patient table
         patientRepository.save(patient);
 
-        return AuthResponse.builder()
+        return RegisterResponse.builder()
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
                 .build();
     }
 
     @Override
-    public AuthResponse login(LoginDTO loginDTO) {
+    public LoginResponse login(LoginDTO loginDTO) {
 
         try {
             authenticationManager.authenticate(
@@ -75,6 +77,9 @@ public class AuthServiceImpl implements AuthService {
                             loginDTO.getPassword()
                     )
             );
+        } catch (DisabledException e) {
+            throw new APIException(HttpStatus.UNAUTHORIZED, "Your account is currently inactive. Please contact support.");
+
         } catch (Exception e) {
             throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
@@ -85,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
 
-        return AuthResponse.builder()
+        return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .email(user.getEmail())

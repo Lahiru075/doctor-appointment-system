@@ -9,12 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/doctors")
@@ -38,5 +36,40 @@ public class DoctorController {
                 .build();
 
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ApiResponse<List<DoctorResponseDTO>>> getAllDoctors(){
+
+        List<DoctorResponseDTO> doctors = doctorService.getAll();
+
+        ApiResponse<List<DoctorResponseDTO>> apiResponse = ApiResponse.<List<DoctorResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctors retrieved successfully!")
+                .data(doctors)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> updateDoctorStatus(@PathVariable Long id){
+
+        doctorService.updateDoctorStatus(id);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor status updated successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
     }
 }

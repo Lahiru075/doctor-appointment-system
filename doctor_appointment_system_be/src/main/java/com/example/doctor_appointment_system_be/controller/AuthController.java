@@ -4,7 +4,6 @@ import com.example.doctor_appointment_system_be.dto.*;
 import com.example.doctor_appointment_system_be.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +22,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterDTO registerDTO) {
-        AuthResponse response = authService.register(registerDTO);
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterDTO registerDTO) {
+        RegisterResponse response = authService.register(registerDTO);
 
-        ApiResponse<AuthResponse> apiResponse = ApiResponse.<AuthResponse>builder()
+        ApiResponse<RegisterResponse> apiResponse = ApiResponse.<RegisterResponse>builder()
                 .success(true)
                 .status(HttpStatus.CREATED.value())
                 .message("User registered successfully!")
@@ -38,10 +37,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginDTO loginDTO) {
-        AuthResponse response = authService.login(loginDTO);
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginDTO loginDTO) {
+        LoginResponse response = authService.login(loginDTO);
 
-        ApiResponse<AuthResponse> apiResponse = ApiResponse.<AuthResponse>builder()
+        ApiResponse<LoginResponse> apiResponse = ApiResponse.<LoginResponse>builder()
                 .success(true)
                 .status(HttpStatus.OK.value())
                 .message("User logged in successfully!")

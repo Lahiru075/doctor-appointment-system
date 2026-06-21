@@ -3,6 +3,7 @@ package com.example.doctor_appointment_system_be.exception;
 import com.example.doctor_appointment_system_be.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,6 +62,17 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDisabledException(DisabledException ex) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message("Your account is currently inactive. Please contact support.")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     // anapekshitha welawat eka onima error ekak handle kirimata
