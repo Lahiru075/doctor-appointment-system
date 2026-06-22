@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.print.Doc;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,4 +97,46 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.getUser().setActive(!doctor.getUser().isActive());
     }
 
+    @Override
+    @Transactional
+    public DoctorResponseDTO updateDoctor(Long id, DoctorRegisterDTO doctorRegisterDTO) {
+
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+
+        doctor.setBiography(doctorRegisterDTO.getBiography());
+        doctor.setConsultationFee(doctorRegisterDTO.getConsultationFee());
+        doctor.setExperienceYears(doctorRegisterDTO.getExperienceYears());
+
+        if (doctorRegisterDTO.getSpecializationId() != null){
+            Specialization specialization = specializationRepository.findById(doctorRegisterDTO.getSpecializationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Specialization not found with ID: " + doctorRegisterDTO.getSpecializationId()));
+
+            doctor.setSpecialization(specialization);
+        }
+
+        Doctor updatedDoctor = doctorRepository.save(doctor);
+
+        return DoctorResponseDTO.builder()
+                .doctorId(updatedDoctor.getId())
+                .userId(updatedDoctor.getUser().getId())
+                .fullName(updatedDoctor.getUser().getFullName())
+                .email(updatedDoctor.getUser().getEmail())
+                .specializationName(updatedDoctor.getSpecialization().getName())
+                .biography(updatedDoctor.getBiography())
+                .consultationFee(updatedDoctor.getConsultationFee())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteDoctor(Long id) {
+
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+
+        doctor.getUser().setDeleted(true);
+
+        doctorRepository.save(doctor);
+    }
 }

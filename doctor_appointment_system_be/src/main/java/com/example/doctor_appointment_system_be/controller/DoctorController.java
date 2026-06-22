@@ -72,4 +72,42 @@ public class DoctorController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<DoctorResponseDTO>> updateDoctor(
+            @PathVariable Long id,
+            @RequestBody DoctorRegisterDTO doctorRegisterDTO)
+    {
+
+        DoctorResponseDTO response = doctorService.updateDoctor(id, doctorRegisterDTO);
+
+        ApiResponse<DoctorResponseDTO> apiResponse = ApiResponse.<DoctorResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor updated successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteDoctor(@PathVariable Long id){
+
+        doctorService.deleteDoctor(id);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor deleted successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
-    @Query("SELECT d FROM Doctor d JOIN FETCH d.user JOIN FETCH d.specialization")
+    @Query("SELECT d FROM Doctor d JOIN FETCH d.user u JOIN FETCH d.specialization WHERE u.deleted = false")
     List<Doctor> findAllDoctors();
 }

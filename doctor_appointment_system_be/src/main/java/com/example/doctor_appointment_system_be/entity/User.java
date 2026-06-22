@@ -38,10 +38,13 @@ public class User {
 
     private boolean isActive = true;
 
+    private boolean deleted = false;
+
     @PrePersist
     protected void onCreate(){
-        createAt = LocalDateTime.now();
-        isActive = true;
+        this.createAt = LocalDateTime.now();
+        this.isActive = true;
+        this.deleted = false;
     }
 
     // one-to-one relationships

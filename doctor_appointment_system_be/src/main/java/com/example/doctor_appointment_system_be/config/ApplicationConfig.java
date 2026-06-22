@@ -1,5 +1,6 @@
 package com.example.doctor_appointment_system_be.config;
 
+import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
 import com.example.doctor_appointment_system_be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,15 +31,20 @@ public class ApplicationConfig {
     public UserDetailsService userDetailsService() {
 
         return username -> userRepository.findByEmail(username)
-                .map(user -> new User(
-                        user.getEmail(),
-                        user.getPassword(),
-                        user.isActive(), // enabled
-                        true, // accountNonExpired
-                        true, // credentialsNonExpired
-                        true, // accountNonLocked
-                        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-                ))
+                .map(user -> {
+                    if (user.isDeleted()){
+                        throw new UsernameNotFoundException("User not found");
+                    }
+                    return new User(
+                            user.getEmail(),
+                            user.getPassword(),
+                            user.isActive(),
+                            true,
+                            true,
+                            true,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                    );
+                })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }
 
