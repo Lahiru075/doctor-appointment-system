@@ -12,7 +12,7 @@ const DoctorSidebar = () => {
   const navigationItems = [
     { path: '/doctor-dashboard', label: 'Waiting Queue', icon: Users },
     { path: '/doctor/appointments', label: 'Referral Approvals', icon: Calendar },
-    { path: '/doctor/availability', label: 'Manage Slots', icon: Calendar },
+    { path: '/doctor-availability', label: 'Manage Slots', icon: Calendar },
     { path: '/doctor/reviews', label: 'My Reviews', icon: Star },
     { path: '/doctor/profile', label: 'Profile Setup', icon: User }
   ];

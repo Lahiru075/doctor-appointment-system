@@ -7,7 +7,7 @@ const DoctorLayout = () => {
 
   const getHeaderTitle = (pathname: string) => {
     if (pathname.includes('/doctor/appointments')) return 'Pending Referrals & Approvals';
-    if (pathname.includes('/doctor/availability')) return 'Manage Time Slots & Availability';
+    if (pathname.includes('/doctor-availability')) return 'Manage Time Slots & Availability';
     if (pathname.includes('/doctor/reviews')) return 'Patient Ratings & Reviews';
     if (pathname.includes('/doctor/profile')) return 'Professional Profile Management';
     return 'Clinical Waiting Queue Overview'; // Default
