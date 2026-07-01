@@ -5,12 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
-    void deleteByDoctorId(Long doctorId);
+    List<TimeSlot> findByDoctorId(Long id);
 
-    List<TimeSlot> findByDoctorIdAndDate(Long doctorId, LocalDate date);
+    void deleteByDoctorIdAndIsBookedFalse(Long id);
+
+    boolean existsByDoctorIdAndDateAndStartTime(Long id, LocalDate date, LocalTime current);
 }

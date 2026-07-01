@@ -13,6 +13,7 @@ export interface DoctorProfile {
 
 
 export const saveAvailability = async (userId: number, schedule: WeeklyScheduleDTO) => {
+    console.log(schedule)
     try {
         await api.post(`/time-slot/generate/${userId}`, schedule);
     } catch (error: any) {
@@ -21,7 +22,7 @@ export const saveAvailability = async (userId: number, schedule: WeeklyScheduleD
     }
 };
 
-export const getAvailability = async (doctorId: number): Promise<WeeklyScheduleDTO> => {
-    const response = await api.get(`/time-slot/${doctorId}`);
+export const getAvailability = async (userId: number): Promise<WeeklyScheduleDTO> => {
+    const response = await api.get(`/time-slot/${userId}`);
     return response.data.data; 
 };

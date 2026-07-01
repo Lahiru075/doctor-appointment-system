@@ -8,6 +8,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WeeklyScheduleDTO {
-    private List<DailyScheduleDTO> dailySchedules;
-    private int buffer;
+    private int defaultSlotDuration;
+    private List<DailyScheduleDTO> days;
 }

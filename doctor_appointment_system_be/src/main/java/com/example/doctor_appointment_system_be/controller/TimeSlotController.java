@@ -36,4 +36,19 @@ public class TimeSlotController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<WeeklyScheduleDTO>> getWeeklySlots(@PathVariable Long userId) {
+        WeeklyScheduleDTO schedule  = timeSlotService.getAvailability(userId);
+
+        ApiResponse<WeeklyScheduleDTO> apiResponse = ApiResponse.<WeeklyScheduleDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Availability retrieved successfully!")
+                .timestamp(LocalDateTime.now())
+                .data(schedule )
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

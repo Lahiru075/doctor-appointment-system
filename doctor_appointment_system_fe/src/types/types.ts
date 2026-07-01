@@ -11,17 +11,16 @@ interface TimeSlotDTO {
     id?: string;
     startTime: string; 
     endTime: string;   
+    booked: boolean;
 }
 
 export interface DailyScheduleDTO {
     dayOfWeek: DayOfWeek;
-    available: boolean;
     slots: TimeSlotDTO[];
     slotDuration?: number; 
 }
 
 export interface WeeklyScheduleDTO {
     defaultSlotDuration: number;
-    bufferBetweenSlots: number;
     days: DailyScheduleDTO[];
 }

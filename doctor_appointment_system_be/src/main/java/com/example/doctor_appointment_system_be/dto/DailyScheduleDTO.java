@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,8 +13,5 @@ import java.time.LocalTime;
 @Builder
 public class DailyScheduleDTO {
     private String dayOfWeek;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private boolean isAvailable;
-    private int slotDuration;
+    private List<TimeSlotDTO> slots;
 }
