@@ -87,7 +87,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
             throw new ResourceNotFoundException("Doctor not found for this User ID");
         }
 
-        List<TimeSlot> slots = timeSlotRepository.findByDoctorId(doctor.getId());
+        List<TimeSlot> slots = timeSlotRepository.findByDoctorIdAndDateGreaterThanEqual(doctor.getId(), LocalDate.now());
 
         // Default values
         int duration = 30;
