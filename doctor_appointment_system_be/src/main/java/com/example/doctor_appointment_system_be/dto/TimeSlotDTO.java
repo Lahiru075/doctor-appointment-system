@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TimeSlotDTO {
+    private String id;
     private String startTime;
     private String endTime;
     private boolean isBooked;

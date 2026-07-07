@@ -1,507 +1,227 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-    Clock,
-    Plus,
-    Trash2,
-    Settings,
-    CheckCircle2,
-    Save,
-    Calendar,
-    Globe,
-    Loader2,
-    HelpCircle,
-    RefreshCw,
-    AlertCircle,
-    Sparkles,
-    ChevronRight,
-    Sliders,
-    CalendarDays
-} from 'lucide-react';
+import { Clock, Plus, Trash2, Save, Loader2, Settings, Calendar } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import { saveAvailability, getAvailability } from "../services/doctor";
 import type { WeeklyScheduleDTO, DayOfWeek } from "../types/types";
 
-// DTO Schema Definitions
-export interface TimeSlotDTO {
-    id: string; // for React list keys
-    startTime: string; // e.g. "09:00"
-    endTime: string;   // e.g. "12:00"
-}
-
-const DAYS_ORDER: DayOfWeek[] = [
-    'MONDAY',
-    'TUESDAY',
-    'WEDNESDAY',
-    'THURSDAY',
-    'FRIDAY',
-    'SATURDAY',
-    'SUNDAY'
-];
+const DAYS: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
 const DoctorAvailability = () => {
-    // Pre-seed mock data representing WeeklyScheduleDTO
-    const [schedule, setSchedule] = useState<WeeklyScheduleDTO>({
-        defaultSlotDuration: 30,
-        days: [
-            {
-                dayOfWeek: 'MONDAY',
-                slots: [
-                    { id: 'mon-1', startTime: '09:00', endTime: '12:00', booked: false },
-                    { id: 'mon-2', startTime: '14:00', endTime: '17:00', booked: false }
-                ]
-            },
-            {
-                dayOfWeek: 'TUESDAY',
-                slots: [
-                    { id: 'tue-1', startTime: '09:00', endTime: '13:00', booked: false }
-                ]
-            },
-            {
-                dayOfWeek: 'WEDNESDAY',
-                slots: [
-                    { id: 'wed-1', startTime: '09:00', endTime: '12:00', booked: false },
-                    { id: 'wed-2', startTime: '14:00', endTime: '18:00', booked: false }
-                ]
-            },
-            {
-                dayOfWeek: 'THURSDAY',
-                slots: [
-                    { id: 'thu-1', startTime: '10:00', endTime: '15:00', booked: false }
-                ]
-            },
-            {
-                dayOfWeek: 'FRIDAY',
-                slots: [
-                    { id: 'fri-1', startTime: '09:00', endTime: '12:00', booked: false },
-                    { id: 'fri-2', startTime: '15:00', endTime: '19:00', booked: false }
-                ]
-            },
-            {
-                dayOfWeek: 'SATURDAY',
-                slots: []
-            },
-            {
-                dayOfWeek: 'SUNDAY',
-                slots: []
-            }
-        ]
-    });
-
-    // UI / Interactive States
     const { user } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
-    const [validationError, setValidationError] = useState<string | null>(null);
+    const [schedule, setSchedule] = useState<WeeklyScheduleDTO>({
+        defaultSlotDuration: 30,
+        days: DAYS.map(day => ({ dayOfWeek: day, slots: [] }))
+    });
 
-    // 1. Page eka load weddi backend eken data gannawa
+    const hasDbData = schedule.days.some(day =>
+        day.slots.some(slot => slot.id && !slot.id.startsWith('new-') && !slot.id.startsWith('temp-'))
+    );
+
+    // 1. Load data from Backend
     useEffect(() => {
-        const fetchSchedule = async () => {
+        const loadData = async () => {
             try {
                 const data = await getAvailability(user.id);
-
-                if (data.days[0].slots.length === 0) {
-                    console.warn("No schedule data found for user, using default.");
-                    return;
-                }
-
-                setSchedule(data); // Backend eken ena data UI ekata set karanawa
-
-            } catch (err) {
-                console.error("Failed to load schedule");
-            }
+                if (data) setSchedule(data);
+            } catch (err) { console.error("Load failed"); }
         };
-        fetchSchedule();
-    }, [user]);
+        loadData();
+    }, [user.id]);
 
-    // 2. Dawasak On/Off karana eka (Active/Unavailable)
-    const handleToggleDay = (dayName: DayOfWeek) => {
-        const day = schedule.days.find(d => d.dayOfWeek === dayName);
+    // Dates calculate kirima (Next Week fallback) 
+    const getNextWeekDate = (dayName: DayOfWeek) => {
+        const now = new Date();
+        const dayMap: any = { 'MONDAY': 1, 'TUESDAY': 2, 'WEDNESDAY': 3, 'THURSDAY': 4, 'FRIDAY': 5, 'SATURDAY': 6, 'SUNDAY': 7 };
+        const todayIdx = now.getDay() === 0 ? 7 : now.getDay();
+        const targetIdx = dayMap[dayName];
+        let diff = targetIdx - todayIdx + 7;
+        const nextDate = new Date(now);
+        nextDate.setDate(now.getDate() + diff);
+        return nextDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    };
 
-        const hasBooked = day?.slots.some(s => s.booked);
+    // Past time check kirima 
+    const isSlotLocked = (slotDate: string, endTime: string, booked: boolean) => {
+        if (booked) return true;
 
-        if (hasBooked) {
-            setValidationError(`Cannot disable ${formatDay(dayName)}: appointments are already booked.`);
-            return;
+        const now = new Date();
+        const todayStr = now.toLocaleDateString('en-CA');
+
+        // (Ex: If July 6 < July 7 Expired)
+        if (slotDate < todayStr) return true;
+
+        // If the slot is for today, check if the end time has passed
+        if (slotDate === todayStr) {
+            const [h, m] = endTime.split(':').map(Number);
+            const slotTime = new Date();
+            slotTime.setHours(h, m, 0);
+            return slotTime < now;
         }
 
-        setSchedule(prev => ({
-            ...prev,
-            days: prev.days.map(d => d.dayOfWeek === dayName
-                ? { ...d, slots: d.slots.length > 0 ? [] : [{ id: `def-${Date.now()}`, startTime: '09:00', endTime: '17:00', booked: false }] }
-                : d)
-        }));
+        return false;
     };
 
-    // 3. Slot ekaka start/end time wenas karana eka
-    const handleUpdateSlotTime = (dayName: DayOfWeek, slotId: string, field: 'startTime' | 'endTime', value: string) => {
-        setSchedule(prev => ({
-            ...prev,
-            days: prev.days.map(d => d.dayOfWeek === dayName
-                ? { ...d, slots: d.slots.map(s => s.id === slotId ? { ...s, [field]: value } : s) }
-                : d)
-        }));
+    // Add Slot
+    const addSlot = (dayName: DayOfWeek) => {
+        if (dayName === 'SUNDAY') return;
+        const newSlot = {
+            id: `new-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+            startTime: '09:00',
+            endTime: '10:00',
+            booked: false
+        };
+        setSchedule({
+            ...schedule,
+            days: schedule.days.map(d => d.dayOfWeek === dayName ? { ...d, slots: [...d.slots, newSlot] } : d)
+        });
     };
 
-    // 4. Aluth slot ekak add karana eka
-    const handleAddSlot = (dayName: DayOfWeek) => {
-        setSchedule(prev => ({
-            ...prev,
-            days: prev.days.map(d => d.dayOfWeek === dayName
-                ? { ...d, available: true, slots: [...d.slots, { id: Date.now().toString(), startTime: '09:00', endTime: '10:00', booked: false }] }
-                : d)
-        }));
+    // Remove Slot
+    const removeSlot = (dayName: DayOfWeek, slotId: string | number) => {
+        setSchedule({
+            ...schedule,
+            days: schedule.days.map(d => d.dayOfWeek === dayName ? {
+                ...d, slots: d.slots.filter(s => String(s.id) !== String(slotId))
+            } : d)
+        });
     };
 
-    // 5. Slot ekak remove karana eka
-    const handleRemoveSlot = (dayName: DayOfWeek, slotId: string) => {
-        setSchedule(prev => ({
-            ...prev,
-            days: prev.days.map(d => {
-                if (d.dayOfWeek === dayName) {
-                    return { ...d, slots: d.slots.filter(s => s.id !== slotId || s.booked) };
-                }
-                return d;
-            })
-        }));
+    // Update Time
+    const updateTime = (dayName: DayOfWeek, slotId: string | number, field: 'startTime' | 'endTime', value: string) => {
+        setSchedule({
+            ...schedule,
+            days: schedule.days.map(d => d.dayOfWeek === dayName ? {
+                ...d, slots: d.slots.map(s => String(s.id) === String(slotId) ? { ...s, [field]: value } : s)
+            } : d)
+        });
     };
 
-    // Helper: Format day string to Title Case
-    const formatDay = (day: DayOfWeek) => {
-        return day.charAt(0) + day.slice(1).toLowerCase();
-    };
-
-    const validateSchedule = (): boolean => {
-        for (const d of schedule.days) {
-            // Slots list eka empty nam, e dawasa unavailable kiyala hithala validate karanna oni nehe
-            if (!d.slots || d.slots.length === 0) continue;
-
-            for (const slot of d.slots) {
-                const [sh, sm] = slot.startTime.split(':').map(Number);
-                const [eh, em] = slot.endTime.split(':').map(Number);
-                const startMin = sh * 60 + sm;
-                const endMin = eh * 60 + em;
-
-                // Start time eka end time ekata wada wadi nam error ekak denawa
-                if (startMin >= endMin) {
-                    setValidationError(`End time must be after start time on ${formatDay(d.dayOfWeek)}.`);
-                    return false;
-                }
-            }
-
-            // Slot dekak hapenawada (overlap wenawada) kiyala check karanawa
-            const sortedSlots = [...d.slots].sort((a, b) => {
-                const [ah, am] = a.startTime.split(':').map(Number);
-                const [bh, bm] = b.startTime.split(':').map(Number);
-                return (ah * 60 + am) - (bh * 60 + bm);
-            });
-
-            for (let i = 0; i < sortedSlots.length - 1; i++) {
-                const current = sortedSlots[i];
-                const next = sortedSlots[i + 1];
-                const [ch, cm] = current.endTime.split(':').map(Number);
-                const [nh, nm] = next.startTime.split(':').map(Number);
-
-                // Current slot eke end time eka, next slot eke start time ekata wada wadi nam overlap wenawa
-                if (ch * 60 + cm > nh * 60 + nm) {
-                    setValidationError(`Overlapping slots on ${formatDay(d.dayOfWeek)}.`);
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-
-    const handleGlobalChange = (field: keyof Omit<WeeklyScheduleDTO, 'days'>, value: any) => {
-        setSchedule(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    // 6. Save karana eka (Validation karala backend ekata yawana eka)
     const handleSave = async () => {
-        if (!validateSchedule()) return; // Waradi nam save wenne nehe
-
+        setIsSaving(true);
         try {
-            setIsSaving(true);
-            await saveAvailability(user.id, schedule); // Data backend ekata yawana eka
-            setToastMessage("Schedule successfully synchronized!");
-        } catch (err: any) {
-            setValidationError("Failed to save: " + err.message);
+
+            if (!schedule.days.some(d => d.slots.length > 0)) {
+                alert("Error: Schedule is empty.");
+                return;
+            }
+
+            await saveAvailability(user.id, schedule);
+            alert("Success: Weekly Schedule Updated!");
+        } catch (err) {
+            alert("Error: Could not save schedule.");
         } finally {
             setIsSaving(false);
         }
     };
 
     return (
-        <div id="doctor-availability-manager" className="space-y-6 font-sans">
+        <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
 
-            {/* Toast Notification */}
-            <AnimatePresence>
-                {toastMessage && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="fixed top-24 right-6 md:right-12 z-50 max-w-md bg-[#082e3e] text-white border border-[#8eb5ca]/35 rounded-[1.5rem] p-4.5 shadow-2xl flex items-center gap-3.5"
-                    >
-                        <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
-                            <CheckCircle2 className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 text-left min-w-0">
-                            <h4 className="font-extrabold text-xs tracking-tight text-white mb-0.5">DTO Registry Sync Complete</h4>
-                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">{toastMessage}</p>
-                        </div>
-                        <button
-                            onClick={() => setToastMessage(null)}
-                            className="text-slate-400 hover:text-white font-bold text-xs p-1"
-                        >
-                            ✕
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
-            {/* Main Grid Wrapper (Desktop split sidebar & schedule rows) */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
-                {/* Left Side: Global Configurations Panel (1 column) */}
-                <div id="availability-config-sidebar" className="bg-white border border-slate-200/50 rounded-[2.25rem] p-6.5 shadow-xs space-y-6">
-                    <div className="flex items-center space-x-3 pb-4 border-b border-slate-100">
-                        <div className="p-2.5 bg-[#f0f5f8] rounded-xl border border-white text-[#0a4053]">
-                            <Settings className="w-4 h-4" />
-                        </div>
-                        <div>
-                            <h3 className="font-extrabold text-sm text-[#082e3e] tracking-tight">Global Controls</h3>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Sync variables</p>
-                        </div>
-                    </div>
-
-                    {/* Validation Alert */}
-                    {validationError && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-red-50 border border-red-100 rounded-2xl p-4 flex gap-2.5 text-xs text-red-800 font-semibold leading-normal"
-                        >
-                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                            <span>{validationError}</span>
-                        </motion.div>
-                    )}
-
-                    {/* Configuration Parameters */}
-                    <div className="space-y-4 text-xs">
-                        {/* Slot Duration */}
-                        <div>
-                            <label className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider mb-2.5">
-                                Default Slot Duration
-                            </label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {[15, 30, 60].map((dur) => (
-                                    <button
-                                        key={dur}
-                                        type="button"
-                                        onClick={() => handleGlobalChange('defaultSlotDuration', dur)}
-                                        className={`py-2 rounded-xl border font-bold text-[11px] transition cursor-pointer text-center ${schedule.defaultSlotDuration === dur
-                                            ? 'bg-[#082e3e] text-white border-transparent shadow-3xs'
-                                            : 'bg-[#f8fafc] text-[#0a4053] hover:bg-[#e3edf2] border-slate-200/60'
-                                            }`}
-                                    >
-                                        {dur} min
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action button */}
-                    <div className="pt-2">
-                        <button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="w-full flex items-center justify-center space-x-2.5 text-xs font-black bg-[#082e3e] hover:bg-[#0d3b4f] disabled:bg-[#082e3e]/70 text-white rounded-xl py-3.5 shadow-3xs cursor-pointer hover:shadow-md transition-all"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span>Synchronizing...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4 text-slate-200" />
-                                    <span>Save Availability DTO</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+            {/* Top Control Panel */}
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="space-y-1 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#082e3e] tracking-tight">Weekly Availability</h2>
+                    <p className="text-slate-400 font-medium text-sm italic">Planning for the upcoming clinical week</p>
                 </div>
 
-                {/* Right Side: Weekly Schedule Card-based list (3 columns) */}
-                <div className="lg:col-span-3 space-y-4">
-
-                    {/* Header instructions block */}
-                    <div className="bg-white/70 backdrop-blur-md border border-slate-200/40 rounded-[2rem] p-5 flex items-center justify-between text-xs font-medium">
-                        <div className="flex items-center space-x-3 text-slate-600">
-                            <CalendarDays className="w-5 h-5 text-[#0a4053] shrink-0" />
-                            <span>Configure daily active clinician shifts. Adding multiple custom time slots allows split shifts (e.g., morning/evening).</span>
-                        </div>
-
-                        <span className="hidden sm:inline-flex bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-[10px] font-bold border border-slate-200/50">
-                            DTO Format
-                        </span>
-                    </div>
-
-                    {/* Days Grid Rows */}
-                    <div className="space-y-3.5">
-                        {DAYS_ORDER.map((dayName) => {
-                            const dayData = schedule.days.find(d => d.dayOfWeek === dayName) || { dayOfWeek: dayName, available: false, slots: [] };
-                            const isAvailable = dayData.slots && dayData.slots.length > 0;
-
-                            return (
-                                <div
-                                    key={dayName}
-                                    className={`bg-white border rounded-[2.25rem] transition-all duration-200 overflow-hidden ${isAvailable
-                                        ? 'border-[#e3edf2] hover:border-[#8eb5ca]/60 hover:shadow-xs bg-gradient-to-tr from-white to-[#f0f5f8]/10'
-                                        : 'border-slate-200/40 bg-slate-50/50'
-                                        }`}
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100">
+                        <Settings className="w-4 h-4 text-[#85abc0] ml-2" />
+                        <div className="flex gap-1">
+                            {[15, 30, 45, 60].map(m => (
+                                <button
+                                    key={m}
+                                    disabled={hasDbData} 
+                                    onClick={() => setSchedule({ ...schedule, defaultSlotDuration: m })}
+                                    className={`px-4 py-1.5 rounded-xl text-[11px] font-black transition-all ${schedule.defaultSlotDuration === m
+                                            ? 'bg-[#082e3e] text-white shadow-md'
+                                            : 'text-slate-400 hover:bg-white'
+                                        } ${hasDbData ? 'opacity-40 cursor-not-allowed' : ''}`} 
                                 >
-                                    <div className="p-5.5 sm:p-6 flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
-
-                                        {/* Left details (Day Name and Availability Badge Indicator) */}
-                                        <div className="flex items-center space-x-4 shrink-0 min-w-[140px]">
-
-                                            {/* Day toggle switch */}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleToggleDay(dayName)}
-                                                disabled={dayData.slots.some(s => s.booked)} // Disable switch if booked
-                                                className={`... ${dayData.slots.some(s => s.booked) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            ></button>
-
-                                            <div className="text-left">
-                                                <span className="block font-black text-[#082e3e] text-sm leading-none mb-1">
-                                                    {formatDay(dayName)}
-                                                </span>
-                                                <span className={`text-[9px] uppercase tracking-wider font-extrabold ${isAvailable ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                                    {isAvailable ? 'Active Shift' : 'Unavailable'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Middle: Active slots config area */}
-                                        <div className="flex-1 w-full">
-                                            {isAvailable ? (
-                                                <div className="flex flex-col gap-3.5">
-                                                    {dayData.slots.map((slot, index) => {
-                                                        // me line eken check karanawa book wela da kiyala (true or "true" unath awlak nehe)
-                                                        const isBooked = slot.booked === true;
-                                                        console.log(slot);
-
-                                                        return (
-                                                            <div
-                                                                key={slot.id || index}
-                                                                className={`flex flex-wrap items-center gap-2.5 bg-white border border-slate-200/50 p-2.5 rounded-2xl shadow-3xs ${isBooked ? 'opacity-60 bg-slate-100 pointer-events-none' : ''}`}
-                                                            >
-                                                                {/* Sequence index */}
-                                                                <span className="w-5.5 h-5.5 flex items-center justify-center bg-[#f0f5f8] text-[#0a4053] font-black rounded-lg text-[9px] border border-white">
-                                                                    {index + 1}
-                                                                </span>
-
-                                                                {/* Time inputs */}
-                                                                <div className="flex items-center space-x-2">
-                                                                    <div className="relative">
-                                                                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                                                                        <input
-                                                                            type="time"
-                                                                            value={slot.startTime}
-                                                                            disabled={slot.booked} // meka disable wenawa
-                                                                            onChange={(e) => handleUpdateSlotTime(dayName, slot.id, 'startTime', e.target.value)}
-                                                                            className={`bg-[#f8fafc] border border-slate-200 rounded-xl pl-8 pr-2.5 py-1.5 font-bold text-xs text-[#0a4053] ${slot.booked ? 'cursor-not-allowed' : 'focus:ring-2 focus:ring-[#8eb5ca]/30'}`}
-                                                                        />
-                                                                    </div>
-                                                                    <span className="text-slate-350 text-[10px] font-bold">to</span>
-                                                                    <div className="relative">
-                                                                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                                                                        <input
-                                                                            type="time"
-                                                                            value={slot.endTime}
-                                                                            disabled={slot.booked} // meka disable wenawa
-                                                                            onChange={(e) => handleUpdateSlotTime(dayName, slot.id, 'endTime', e.target.value)}
-                                                                            className={`bg-[#f8fafc] border border-slate-200 rounded-xl pl-8 pr-2.5 py-1.5 font-bold text-xs text-[#0a4053] ${slot.booked ? 'cursor-not-allowed' : 'focus:ring-2 focus:ring-[#8eb5ca]/30'}`}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Remove button - isBooked nam penne nehe */}
-                                                                {!isBooked && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveSlot(dayName, slot.id)}
-                                                                        className="p-2 text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 hover:border-red-100 rounded-xl transition border border-slate-200/30 cursor-pointer ml-auto shrink-0"
-                                                                    >
-                                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                                    </button>
-                                                                )}
-
-                                                                {/* Booked badge */}
-                                                                {isBooked && (
-                                                                    <span className="ml-auto text-[9px] font-black uppercase text-rose-500 bg-rose-50 px-2 py-1 rounded-lg">
-                                                                        Booked
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center text-slate-400 text-xs font-semibold select-none bg-slate-100/50 border border-dashed border-slate-250 p-4.5 rounded-[1.5rem] italic justify-center">
-                                                    Doctor is out of clinic on {formatDay(dayName)}. Toggle active shift to onboard.
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Right: Add slots button (only shown if available) */}
-                                        <div className="shrink-0 flex items-center md:self-center">
-                                            {isAvailable && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleAddSlot(dayName)}
-                                                    className="flex items-center space-x-1 px-4 py-2 bg-[#f0f5f8] hover:bg-[#e3edf2] text-[#0a4053] border border-slate-200/30 hover:border-slate-300 rounded-xl transition text-[11px] font-bold cursor-pointer shadow-3xs"
-                                                >
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                    <span>Split Shift</span>
-                                                </button>
-                                            )}
-                                        </div>
-
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Symmetrical Statistics / Info Footer */}
-                    <div className="bg-white border border-[#e3edf2] rounded-[2rem] p-5.5 flex flex-wrap gap-4 items-center justify-between text-xs">
-                        <div className="flex items-center space-x-2 text-slate-400 font-semibold">
-                            <Sparkles className="w-4 h-4 text-slate-400" />
-                            <span>Auto-generation protocols format available shifts into standard JSON intervals.</span>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            <span className="text-slate-400 font-bold">Total Active Days:</span>
-                            <span className="font-extrabold text-[#082e3e] bg-[#e3edf2] px-3 py-1 rounded-lg border border-white">
-                                {schedule.days.filter(d => d.slots && d.slots.length > 0).length} Days
-                            </span>
+                                    {m}m
+                                </button>
+                            ))}
                         </div>
                     </div>
-
+                    <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-[#082e3e] text-white px-10 py-4 rounded-[1.5rem] font-black hover:bg-[#0a4053] transition-all shadow-xl shadow-[#082e3e]/20 disabled:opacity-50">
+                        {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                        Sync Schedule
+                    </button>
                 </div>
-
             </div>
 
+            {/* Days Grid */}
+            <div className="grid gap-5">
+                {schedule.days.map((day) => {
+                    const isSunday = day.dayOfWeek === 'SUNDAY';
+
+                    // DB date ho getNextWeekDate use kirima 
+                    const displayDate = (day as any).date ? (day as any).date : getNextWeekDate(day.dayOfWeek);
+
+                    return (
+                        <div key={day.dayOfWeek} className={`bg-white p-6 rounded-[2.5rem] border transition-all flex flex-col lg:flex-row gap-8 ${isSunday ? 'border-dashed border-slate-200 bg-slate-50/50' : 'border-slate-100 shadow-xs'}`}>
+
+                            {/* Day & Date Info */}
+                            <div className="lg:w-48 shrink-0">
+                                <h3 className={`text-xl font-black ${isSunday ? 'text-slate-300' : 'text-[#082e3e]'}`}>{day.dayOfWeek}</h3>
+                                <div className="flex items-center gap-1.5 text-[#85abc0] font-bold text-xs mt-1">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    <span>{displayDate}</span>
+                                </div>
+                                {isSunday && <span className="inline-block mt-3 text-[10px] font-black text-rose-400 bg-rose-50 px-3 py-1 rounded-full uppercase">Forced Holiday</span>}
+                            </div>
+
+                            {/* Shifts Area */}
+                            <div className="flex-1 space-y-3">
+                                {day.slots.length > 0 ? (
+                                    day.slots.map((slot) => {
+                                        const locked = isSlotLocked(displayDate, slot.endTime, slot.booked);
+                                        return (
+                                            <div key={slot.id} className={`flex items-center gap-4 p-4 rounded-[1.5rem] border transition-all ${locked ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-[#f8fafc] border-slate-200 hover:shadow-sm'}`}>
+                                                <Clock className={`w-4 h-4 ${locked ? 'text-slate-300' : 'text-[#85abc0]'}`} />
+                                                <div className="flex items-center gap-3 font-black text-[#082e3e]">
+                                                    <input type="time" value={slot.startTime} disabled={locked} onChange={(e) => updateTime(day.dayOfWeek, slot.id, 'startTime', e.target.value)} className="bg-transparent outline-none cursor-pointer focus:text-blue-600" />
+                                                    <span className="text-slate-300 text-xs font-bold uppercase">to</span>
+                                                    <input type="time" value={slot.endTime} disabled={locked} onChange={(e) => updateTime(day.dayOfWeek, slot.id, 'endTime', e.target.value)} className="bg-transparent font-bold text-[#082e3e] outline-none cursor-pointer" />
+                                                </div>
+
+                                                <div className="ml-auto flex items-center gap-2">
+                                                    {slot.booked && <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase border border-emerald-100">Booked</span>}
+                                                    {locked && !slot.booked && <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-3 py-1 rounded-lg uppercase">Expired</span>}
+                                                    {!locked && (
+                                                        <button onClick={() => removeSlot(day.dayOfWeek, slot.id)} className="p-2 text-slate-300 hover:text-rose-500 transition-colors hover:bg-rose-50 rounded-xl">
+                                                            <Trash2 className="w-4.5 h-4.5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="h-16 flex items-center justify-center border border-dashed border-slate-200 rounded-[1.5rem]">
+                                        <p className="text-slate-300 text-xs font-bold uppercase tracking-widest italic">No shifts scheduled</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Add Button */}
+                            <div className="lg:w-40 flex items-center justify-center">
+                                {!isSunday && (
+                                    <button onClick={() => addSlot(day.dayOfWeek)} className="group flex items-center gap-2 text-[#85abc0] font-extrabold text-xs hover:text-[#082e3e] transition-all bg-slate-50 hover:bg-slate-100 px-5 py-3 rounded-2xl border border-slate-100">
+                                        <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                                        Add Shift
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
-}
+};
 
 export default DoctorAvailability;

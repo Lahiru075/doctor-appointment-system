@@ -13,7 +13,6 @@ export interface DoctorProfile {
 
 
 export const saveAvailability = async (userId: number, schedule: WeeklyScheduleDTO) => {
-    console.log(schedule)
     try {
         await api.post(`/time-slot/generate/${userId}`, schedule);
     } catch (error: any) {

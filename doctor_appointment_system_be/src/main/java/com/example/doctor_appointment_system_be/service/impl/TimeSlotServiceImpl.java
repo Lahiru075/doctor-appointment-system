@@ -116,6 +116,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
             if (!daySlots.isEmpty()) {
                 dayDTO.setSlots(daySlots.stream().map(s ->
                         new TimeSlotDTO(
+                                s.getId().toString(),
                                 s.getStartTime().toString(),
                                 s.getEndTime().toString(),
                                 s.isBooked()
