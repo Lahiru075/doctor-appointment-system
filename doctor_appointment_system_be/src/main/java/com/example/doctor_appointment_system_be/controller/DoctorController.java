@@ -3,6 +3,7 @@ package com.example.doctor_appointment_system_be.controller;
 import com.example.doctor_appointment_system_be.dto.ApiResponse;
 import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
+import com.example.doctor_appointment_system_be.dto.DoctorSuggestionDTO;
 import com.example.doctor_appointment_system_be.service.DoctorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -105,6 +106,41 @@ public class DoctorController {
                 .status(HttpStatus.OK.value())
                 .message("Doctor deleted successfully!")
                 .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<DoctorResponseDTO>>> searchDoctors(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long specializationId
+    ){
+        List<DoctorResponseDTO> doctors = doctorService.searchDoctors(name, specializationId);
+
+        ApiResponse<List<DoctorResponseDTO>> apiResponse = ApiResponse.<List<DoctorResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor search successfully!")
+                .data(doctors)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<ApiResponse<List<DoctorSuggestionDTO>>> getSuggestions(
+            @RequestParam String query) {
+
+        List<DoctorSuggestionDTO> suggestions = doctorService.getSuggestions(query);
+
+        ApiResponse<List<DoctorSuggestionDTO>> apiResponse = ApiResponse.<List<DoctorSuggestionDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Suggestions fetched successfully!")
+                .data(suggestions)
                 .timestamp(LocalDateTime.now())
                 .build();
 

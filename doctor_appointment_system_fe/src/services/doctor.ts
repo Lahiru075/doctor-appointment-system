@@ -1,15 +1,6 @@
 import api from "./api"
-import type  { WeeklyScheduleDTO } from "../types/types";
+import type  { WeeklyScheduleDTO, Specialization, DoctorSuggestion, DoctorResponseDTO } from "../types/types";
 
-export interface DoctorProfile {
-    id: number;
-    fullName: string;
-    email: string;
-    specialization: string;
-    consultationFee: number;
-    experienceYears: number;
-    biography: string;
-}
 
 
 export const saveAvailability = async (userId: number, schedule: WeeklyScheduleDTO) => {
@@ -24,4 +15,25 @@ export const saveAvailability = async (userId: number, schedule: WeeklyScheduleD
 export const getAvailability = async (userId: number): Promise<WeeklyScheduleDTO> => {
     const response = await api.get(`/time-slot/${userId}`);
     return response.data.data; 
+};
+
+export const getSpecializations = async (): Promise<Specialization[]> => {
+    const response = await api.get('/specializations');
+    return response.data.data;
+};
+
+export const getDoctorSuggestions = async (query: string): Promise<DoctorSuggestion[]> => {
+    const response = await api.get(`/doctors/suggestions`, {
+        params: { query }
+    });
+    return response.data.data;
+};
+
+export const searchDoctors = async (name?: string, specializationId?: number | ''): Promise<DoctorResponseDTO[]> => {
+    const params: any = {};
+    if (name) params.name = name;
+    if (specializationId) params.specializationId = specializationId;
+
+    const response = await api.get(`/doctors/search`, { params });
+    return response.data.data;
 };

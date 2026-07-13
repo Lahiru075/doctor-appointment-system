@@ -2,7 +2,10 @@ package com.example.doctor_appointment_system_be.service.impl;
 
 import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
+import com.example.doctor_appointment_system_be.dto.DoctorSuggestionDTO;
+import com.example.doctor_appointment_system_be.dto.PatientResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Doctor;
+import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.Specialization;
 import com.example.doctor_appointment_system_be.entity.User;
 import com.example.doctor_appointment_system_be.enums.Role;
@@ -74,16 +77,7 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional(readOnly = true)
     public List<DoctorResponseDTO> getAll() {
         return doctorRepository.findAllDoctors().stream()
-                .map(s -> new DoctorResponseDTO(
-                        s.getId(),
-                        s.getUser().getId(),
-                        s.getUser().getFullName(),
-                        s.getUser().getEmail(),
-                        s.getExperienceYears(),
-                        s.getSpecialization() != null ? s.getSpecialization().getName() : "N/A",
-                        s.getConsultationFee(),
-                        s.getBiography()
-                ))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -117,15 +111,8 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
 
-        return DoctorResponseDTO.builder()
-                .doctorId(updatedDoctor.getId())
-                .userId(updatedDoctor.getUser().getId())
-                .fullName(updatedDoctor.getUser().getFullName())
-                .email(updatedDoctor.getUser().getEmail())
-                .specializationName(updatedDoctor.getSpecialization().getName())
-                .biography(updatedDoctor.getBiography())
-                .consultationFee(updatedDoctor.getConsultationFee())
-                .build();
+        return mapToResponse(updatedDoctor);
+
     }
 
     @Override
@@ -138,5 +125,29 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.getUser().setDeleted(true);
 
         doctorRepository.save(doctor);
+    }
+
+    @Override
+    public List<DoctorResponseDTO> searchDoctors(String name, Long specializationId) {
+        return doctorRepository.searchDoctors(name, specializationId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DoctorSuggestionDTO> getSuggestions(String query) {
+        return doctorRepository.findSuggestions(query);
+    }
+
+    private DoctorResponseDTO mapToResponse(Doctor doctor) {
+        return DoctorResponseDTO.builder()
+                .doctorId(doctor.getId())
+                .userId(doctor.getUser().getId())
+                .fullName(doctor.getUser().getFullName())
+                .email(doctor.getUser().getEmail())
+                .specializationName(doctor.getSpecialization().getName())
+                .biography(doctor.getBiography())
+                .consultationFee(doctor.getConsultationFee())
+                .build();
     }
 }
