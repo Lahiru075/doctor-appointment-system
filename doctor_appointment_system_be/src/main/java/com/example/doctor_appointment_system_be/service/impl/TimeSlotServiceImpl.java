@@ -1,5 +1,6 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
+import com.example.doctor_appointment_system_be.dto.AvailableTimeSlotDTO;
 import com.example.doctor_appointment_system_be.dto.DailyScheduleDTO;
 import com.example.doctor_appointment_system_be.dto.TimeSlotDTO;
 import com.example.doctor_appointment_system_be.dto.WeeklyScheduleDTO;
@@ -126,5 +127,21 @@ public class TimeSlotServiceImpl implements TimeSlotService {
         }
 
         return new WeeklyScheduleDTO(duration, days);
+    }
+
+    @Override
+    public List<AvailableTimeSlotDTO> getAvailableSlots(Long doctorId) {
+
+        List<TimeSlot> slots = timeSlotRepository.findAvailableSlots(doctorId, LocalDate.now());
+
+        System.out.println(slots.size());
+
+        return slots.stream().map(s -> new AvailableTimeSlotDTO(
+                s.getId().toString(),
+                s.getDate().toString(),
+                s.getStartTime().toString(),
+                s.getEndTime().toString(),
+                s.isBooked()
+        )).collect(Collectors.toList());
     }
 }

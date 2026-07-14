@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Plus, Trash2, Save, Loader2, Settings, Calendar } from 'lucide-react';
 import { useAuth } from '../context/authContext';
-import { saveAvailability, getAvailability } from "../services/doctor";
+import { saveAvailability, getAvailability } from "../services/timeSlot";
 import type { WeeklyScheduleDTO, DayOfWeek } from "../types/types";
 
 const DAYS: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];

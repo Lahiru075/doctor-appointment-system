@@ -10,7 +10,7 @@ export type DayOfWeek =
     | 'SATURDAY' 
     | 'SUNDAY';
 
-interface TimeSlotDTO {
+export interface TimeSlotDTO {
     id?: string;
     startTime: string; 
     endTime: string;   
@@ -48,4 +48,12 @@ export interface DoctorResponseDTO {
     specializationName: string; 
     consultationFee: number;
     biography: string;
+}
+
+export interface AvailableTimeSlotDTO {
+    id: string;
+    date: string; 
+    startTime: string;
+    endTime: string;
+    isBooked: boolean;
 }

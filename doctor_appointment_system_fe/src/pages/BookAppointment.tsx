@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Calendar, Star, Loader2, Sparkles, Filter, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Calendar, Star, Loader2, Sparkles, Filter, CheckCircle2, ChevronRight, X, Clock, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { getSpecializations, getDoctorSuggestions, searchDoctors } from "../services/doctor";
-import type { DoctorSuggestion, Specialization, DoctorResponseDTO } from "../types/types";
-
+import { getDoctorSuggestions, searchDoctors } from "../services/doctor";
+import { getSpecializations } from "../services/specialization";
+import { getDoctorAvailableSlots } from "../services/timeSlot"; 
+import type { DoctorSuggestion, Specialization, DoctorResponseDTO, DayOfWeek, AvailableTimeSlotDTO } from "../types/types";
 
 const BookAppointment = () => {
     // Search and Filters States
@@ -14,17 +15,22 @@ const BookAppointment = () => {
     const [specializations, setSpecializations] = useState<Specialization[]>([]);
     const [doctors, setDoctors] = useState<DoctorResponseDTO[]>([]);
 
-    // UI Loading / Interactivity States
     const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponseDTO | null>(null);
+    const [availableSlots, setAvailableSlots] = useState<AvailableTimeSlotDTO[]>([]);
+    const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+    const [bookingDate, setBookingDate] = useState<string>(''); 
+    const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchSpecializations = async () => {
             try {
-                const data = await getSpecializations(); 
+                const data = await getSpecializations();
                 setSpecializations(data);
             } catch (err) {
                 console.error("Failed to load specializations", err);
@@ -43,7 +49,7 @@ const BookAppointment = () => {
         setIsSuggestionsLoading(true);
         const delayDebounceFn = setTimeout(async () => {
             try {
-                const data = await getDoctorSuggestions(searchQuery); 
+                const data = await getDoctorSuggestions(searchQuery);
                 setSuggestions(data);
             } catch (err) {
                 console.error("Failed to fetch suggestions", err);
@@ -54,6 +60,35 @@ const BookAppointment = () => {
 
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery]);
+
+    useEffect(() => {
+        if (!selectedDoctor) {
+            setAvailableSlots([]);
+            return;
+        }
+
+        const fetchSlots = async () => {
+            setIsLoadingSlots(true);
+            try {
+         
+                const data = await getDoctorAvailableSlots(selectedDoctor.doctorId);
+                setAvailableSlots(data);
+
+                const uniqueDates = Array.from(new Set(data.map(s => s.date))).sort();
+                if (uniqueDates.length > 0) {
+                    setBookingDate(uniqueDates[0]);
+                } else {
+                    setBookingDate('');
+                }
+                setSelectedSlotId(null);
+            } catch (err) {
+                console.error("Failed to fetch available slots", err);
+            } finally {
+                setIsLoadingSlots(false);
+            }
+        };
+        fetchSlots();
+    }, [selectedDoctor]);
 
     const handleSearch = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -74,6 +109,25 @@ const BookAppointment = () => {
         setSearchQuery(name);
         setShowSuggestions(false);
     };
+
+    const getAvailableDatesFromSlots = () => {
+        const daysOrder = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+        const uniqueDates = Array.from(new Set(availableSlots.map(s => s.date))).sort();
+        
+        return uniqueDates.map(dateStr => {
+
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const d = new Date(year, month - 1, day);
+            return {
+                formatted: dateStr,
+                dayName: daysOrder[d.getDay()],
+                dayNum: d.getDate()
+            };
+        });
+    };
+
+    const slotsForSelectedDate = availableSlots.filter(s => s.date === bookingDate);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-300">
@@ -204,7 +258,10 @@ const BookAppointment = () => {
                                         <span className="text-base font-black text-[#082e3e]">LKR {doc.consultationFee.toLocaleString()}</span>
                                     </div>
 
-                                    <button className="flex items-center gap-1.5 bg-[#082e3e] hover:bg-[#0a4053] text-white px-4.5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer">
+                                    <button
+                                        onClick={() => setSelectedDoctor(doc)}
+                                        className="flex items-center gap-1.5 bg-[#082e3e] hover:bg-[#0a4053] text-white px-4.5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer"
+                                    >
                                         <span>View Slots</span>
                                         <ChevronRight className="w-3.5 h-3.5" />
                                     </button>
@@ -225,6 +282,134 @@ const BookAppointment = () => {
                     </div>
                 )}
             </div>
+
+            {/* --- TIME SLOT SELECTOR POPUP MODAL (DYNAMIC DATES) --- */}
+            <AnimatePresence>
+                {selectedDoctor && (
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white border border-slate-200/50 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col justify-between"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-[#f8fafc]">
+                                <div>
+                                    <span className="inline-block bg-[#e3edf2] text-[#0a4053] text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
+                                        {selectedDoctor.specializationName}
+                                    </span>
+                                    <h3 className="text-lg font-black text-[#082e3e]">Select Appointment Slot</h3>
+                                    <p className="text-[11px] text-slate-400 font-bold uppercase mt-0.5">Consultation with {selectedDoctor.fullName}</p>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedDoctor(null)}
+                                    className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition cursor-pointer"
+                                >
+                                    <X className="w-4 h-4 text-slate-500" />
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-6 space-y-6">
+                                {/* Date Selector Chips (Dynamic based on DB) */}
+                                <div className="space-y-2">
+                                    <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Select Date</span>
+                                    
+                                    {getAvailableDatesFromSlots().length > 0 ? (
+                                        <div className="grid grid-cols-6 gap-2">
+                                            {getAvailableDatesFromSlots().map((d) => (
+                                                <button
+                                                    key={d.formatted}
+                                                    type="button"
+                                                    onClick={() => setBookingDate(d.formatted)}
+                                                    className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${bookingDate === d.formatted
+                                                            ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-md shadow-[#082e3e]/10'
+                                                            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
+                                                        }`}
+                                                >
+                                                    <span className="text-[9px] font-black tracking-widest">{d.dayName}</span>
+                                                    <span className="text-sm font-black">{d.dayNum}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 border border-dashed border-slate-200 rounded-2xl text-center text-xs text-slate-400 italic">
+                                            No active dates available for booking.
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Available Slots List (Full-Width Rows) */}
+                                <div className="space-y-2">
+                                    <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Available Slots</span>
+                                    
+                                    {isLoadingSlots ? (
+                                        <div className="h-48 flex items-center justify-center">
+                                            <Loader2 className="w-6 h-6 text-[#082e3e] animate-spin" />
+                                        </div>
+                                    ) : slotsForSelectedDate.length > 0 ? (
+                                        <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                                            {slotsForSelectedDate.map((slot) => {
+                                                const isSelected = selectedSlotId === slot.id;
+
+                                                return (
+                                                    <button
+                                                        key={slot.id}
+                                                        type="button"
+                                                        onClick={() => setSelectedSlotId(slot.id)}
+                                                        className={`w-full p-4 rounded-2xl border font-bold text-xs flex items-center justify-between transition-all cursor-pointer ${isSelected
+                                                                ? 'bg-[#082e3e] text-white border-transparent shadow-lg shadow-[#082e3e]/15'
+                                                                : 'bg-[#f8fafc] hover:bg-[#e3edf2] text-[#0a4053] border-slate-200/60'
+                                                            }`}
+                                                    >
+                                                        {/* Left side: Icon and Slot Time */}
+                                                        <div className="flex items-center gap-3.5">
+                                                            <Clock className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-[#85abc0]'}`} />
+                                                            <span className="text-sm font-black">
+                                                                {slot.startTime} - {slot.endTime}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Right side: Custom Circular Check Indicator */}
+                                                        <div className={`w-5.5 h-5.5 rounded-full border flex items-center justify-center transition-all ${isSelected
+                                                                ? 'bg-emerald-500 border-transparent text-white'
+                                                                : 'border-slate-350 bg-white'
+                                                            }`}>
+                                                            {isSelected && <span className="text-[10px] font-black">✓</span>}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="h-48 flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-[2rem] p-4 text-center">
+                                            <AlertCircle className="w-5 h-5 text-slate-350 mb-1" />
+                                            <p className="text-slate-400 text-xs italic font-bold">Please select a date to view available shifts.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-slate-100 bg-[#f8fafc] flex items-center justify-between">
+                                <div>
+                                    <span className="text-[9px] text-slate-400 font-bold uppercase block">Total Payable</span>
+                                    <span className="text-base font-black text-[#082e3e]">LKR {selectedDoctor.consultationFee.toLocaleString()}</span>
+                                </div>
+
+                                <button
+                                    disabled={!selectedSlotId}
+                                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-600/10 flex items-center gap-2 cursor-pointer"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Confirm Booking</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
