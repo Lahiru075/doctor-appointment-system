@@ -57,3 +57,21 @@ export interface AvailableTimeSlotDTO {
     endTime: string;
     isBooked: boolean;
 }
+
+// appointments
+
+export interface AppointmentRequestDTO {
+    patientId: number;
+    doctorId: number;
+    timeSlotId: string | number;
+}
+
+export interface AppointmentResponseDTO {
+    id: number;
+    doctorName: string;
+    specializationName: string;
+    date: string;
+    time: string;
+    consultationFee: number;
+    status: string;
+}

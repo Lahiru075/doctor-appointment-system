@@ -1,5 +1,5 @@
 import api from "./api"
-import type  { Specialization, DoctorSuggestion, DoctorResponseDTO } from "../types/types";
+import type  {DoctorSuggestion, DoctorResponseDTO } from "../types/types";
 
 
 export const getDoctorSuggestions = async (query: string): Promise<DoctorSuggestion[]> => {

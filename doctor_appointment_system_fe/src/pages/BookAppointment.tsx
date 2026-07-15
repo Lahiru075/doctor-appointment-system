@@ -4,10 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import { getDoctorSuggestions, searchDoctors } from "../services/doctor";
 import { getSpecializations } from "../services/specialization";
-import { getDoctorAvailableSlots } from "../services/timeSlot"; 
-import type { DoctorSuggestion, Specialization, DoctorResponseDTO, DayOfWeek, AvailableTimeSlotDTO } from "../types/types";
+import { getDoctorAvailableSlots } from "../services/timeSlot";
+import { bookAppointment } from "../services/appointment";
+import type { DoctorSuggestion, Specialization, DoctorResponseDTO, AvailableTimeSlotDTO, AppointmentRequestDTO, AppointmentResponseDTO } from "../types/types";
+import { useAuth } from '../context/authContext';
 
 const BookAppointment = () => {
+
+    const { user } = useAuth();
+
     // Search and Filters States
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSpec, setSelectedSpec] = useState<number | ''>(0);
@@ -22,8 +27,11 @@ const BookAppointment = () => {
     const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponseDTO | null>(null);
     const [availableSlots, setAvailableSlots] = useState<AvailableTimeSlotDTO[]>([]);
     const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-    const [bookingDate, setBookingDate] = useState<string>(''); 
+    const [bookingDate, setBookingDate] = useState<string>('');
     const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+
+    const [isSaving, setIsSaving] = useState(false);
+    const [bookingSuccess, setBookingSuccess] = useState<AppointmentResponseDTO | null>(null);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +78,7 @@ const BookAppointment = () => {
         const fetchSlots = async () => {
             setIsLoadingSlots(true);
             try {
-         
+
                 const data = await getDoctorAvailableSlots(selectedDoctor.doctorId);
                 setAvailableSlots(data);
 
@@ -114,7 +122,7 @@ const BookAppointment = () => {
         const daysOrder = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
         const uniqueDates = Array.from(new Set(availableSlots.map(s => s.date))).sort();
-        
+
         return uniqueDates.map(dateStr => {
 
             const [year, month, day] = dateStr.split('-').map(Number);
@@ -125,6 +133,31 @@ const BookAppointment = () => {
                 dayNum: d.getDate()
             };
         });
+    };
+
+    const handleConfirmBooking = async () => {
+        if (!selectedSlotId || !selectedDoctor) return;
+
+        try {
+            setIsSaving(true); 
+
+            const bookingRequest: AppointmentRequestDTO = {
+                patientId: user.id, 
+                doctorId: selectedDoctor.doctorId,
+                timeSlotId: selectedSlotId
+            };
+
+            const result = await bookAppointment(bookingRequest);
+            setBookingSuccess(result); 
+            setSelectedDoctor(null); 
+
+            alert("Success: Appointment Booked!");
+
+        } catch (err: any) {
+            alert("Booking Failed: " + err.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const slotsForSelectedDate = availableSlots.filter(s => s.date === bookingDate);
@@ -315,7 +348,7 @@ const BookAppointment = () => {
                                 {/* Date Selector Chips (Dynamic based on DB) */}
                                 <div className="space-y-2">
                                     <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Select Date</span>
-                                    
+
                                     {getAvailableDatesFromSlots().length > 0 ? (
                                         <div className="grid grid-cols-6 gap-2">
                                             {getAvailableDatesFromSlots().map((d) => (
@@ -324,8 +357,8 @@ const BookAppointment = () => {
                                                     type="button"
                                                     onClick={() => setBookingDate(d.formatted)}
                                                     className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${bookingDate === d.formatted
-                                                            ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-md shadow-[#082e3e]/10'
-                                                            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
+                                                        ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-md shadow-[#082e3e]/10'
+                                                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
                                                         }`}
                                                 >
                                                     <span className="text-[9px] font-black tracking-widest">{d.dayName}</span>
@@ -343,7 +376,7 @@ const BookAppointment = () => {
                                 {/* Available Slots List (Full-Width Rows) */}
                                 <div className="space-y-2">
                                     <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Available Slots</span>
-                                    
+
                                     {isLoadingSlots ? (
                                         <div className="h-48 flex items-center justify-center">
                                             <Loader2 className="w-6 h-6 text-[#082e3e] animate-spin" />
@@ -359,8 +392,8 @@ const BookAppointment = () => {
                                                         type="button"
                                                         onClick={() => setSelectedSlotId(slot.id)}
                                                         className={`w-full p-4 rounded-2xl border font-bold text-xs flex items-center justify-between transition-all cursor-pointer ${isSelected
-                                                                ? 'bg-[#082e3e] text-white border-transparent shadow-lg shadow-[#082e3e]/15'
-                                                                : 'bg-[#f8fafc] hover:bg-[#e3edf2] text-[#0a4053] border-slate-200/60'
+                                                            ? 'bg-[#082e3e] text-white border-transparent shadow-lg shadow-[#082e3e]/15'
+                                                            : 'bg-[#f8fafc] hover:bg-[#e3edf2] text-[#0a4053] border-slate-200/60'
                                                             }`}
                                                     >
                                                         {/* Left side: Icon and Slot Time */}
@@ -373,8 +406,8 @@ const BookAppointment = () => {
 
                                                         {/* Right side: Custom Circular Check Indicator */}
                                                         <div className={`w-5.5 h-5.5 rounded-full border flex items-center justify-center transition-all ${isSelected
-                                                                ? 'bg-emerald-500 border-transparent text-white'
-                                                                : 'border-slate-350 bg-white'
+                                                            ? 'bg-emerald-500 border-transparent text-white'
+                                                            : 'border-slate-350 bg-white'
                                                             }`}>
                                                             {isSelected && <span className="text-[10px] font-black">✓</span>}
                                                         </div>
@@ -400,6 +433,7 @@ const BookAppointment = () => {
 
                                 <button
                                     disabled={!selectedSlotId}
+                                    onClick={handleConfirmBooking}
                                     className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-600/10 flex items-center gap-2 cursor-pointer"
                                 >
                                     <CheckCircle2 className="w-4 h-4" />
