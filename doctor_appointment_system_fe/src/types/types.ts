@@ -61,7 +61,7 @@ export interface AvailableTimeSlotDTO {
 // appointments
 
 export interface AppointmentRequestDTO {
-    patientId: number;
+    userId: number;
     doctorId: number;
     timeSlotId: string | number;
 }

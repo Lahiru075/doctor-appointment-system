@@ -142,7 +142,7 @@ const BookAppointment = () => {
             setIsSaving(true); 
 
             const bookingRequest: AppointmentRequestDTO = {
-                patientId: user.id, 
+                userId: user.id, 
                 doctorId: selectedDoctor.doctorId,
                 timeSlotId: selectedSlotId
             };

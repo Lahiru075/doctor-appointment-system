@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AppointmentRequestDTO {
-    private Long patientId;
+    private Long userId;
     private Long doctorId;
     private Long timeSlotId;
 }

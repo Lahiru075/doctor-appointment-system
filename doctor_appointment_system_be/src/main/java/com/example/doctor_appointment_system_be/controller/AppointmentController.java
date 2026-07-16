@@ -8,12 +8,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/appointment")
@@ -36,6 +34,23 @@ public class AppointmentController {
                 .build();
 
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+
+    }
+
+    @GetMapping("/patients/{userId}")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getMyAppointments(@PathVariable Long userId){
+
+        List<AppointmentResponseDTO> response = appointmentService.getMyAppointments(userId);
+
+        ApiResponse<List<AppointmentResponseDTO>> apiResponse = ApiResponse.<List<AppointmentResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Appointments fetch successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
     }
 

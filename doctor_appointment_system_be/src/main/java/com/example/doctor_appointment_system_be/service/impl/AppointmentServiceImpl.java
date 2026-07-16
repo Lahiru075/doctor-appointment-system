@@ -2,6 +2,7 @@ package com.example.doctor_appointment_system_be.service.impl;
 
 import com.example.doctor_appointment_system_be.dto.AppointmentRequestDTO;
 import com.example.doctor_appointment_system_be.dto.AppointmentResponseDTO;
+import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Appointment;
 import com.example.doctor_appointment_system_be.entity.Doctor;
 import com.example.doctor_appointment_system_be.entity.Patient;
@@ -18,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +42,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = doctorRepository.findById(dto.getDoctorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + dto.getDoctorId()));
 
-        Patient patient = patientRepository.findById(dto.getPatientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + dto.getPatientId()));
 
-        if (timeSlot.isBooked()){
+        Patient patient = patientRepository.findByUserId(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found for User ID: " + dto.getUserId()));
+
+        if (timeSlot.isBooked()) {
             throw new APIException(HttpStatus.CONFLICT, "This time slot is already booked by another patient!");
         }
 
@@ -66,4 +71,27 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(savedAppointment.getStatus().name())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getMyAppointments(Long userId) {
+
+        return appointmentRepository.findAppointmentsByUserId(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+    }
+
+    private AppointmentResponseDTO mapToResponse(Appointment appointment) {
+        return AppointmentResponseDTO.builder()
+                .id(appointment.getId())
+                .doctorName(appointment.getDoctor().getUser().getFullName())
+                .specializationName(appointment.getDoctor().getSpecialization().getName())
+                .date(appointment.getTimeSlot().getDate().toString())
+                .time(appointment.getTimeSlot().getStartTime().toString() + " - " + appointment.getTimeSlot().getEndTime().toString())
+                .consultationFee(appointment.getDoctor().getConsultationFee())
+                .status(appointment.getStatus().name())
+                .build();
+    }
+
 }
