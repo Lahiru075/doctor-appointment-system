@@ -38,15 +38,18 @@ api.interceptors.response.use(
                 }
 
                 const res = await refreshTokens(refreshToken);
+
                 localStorage.setItem("accessToken", res.accessToken);
 
                 originalRequest.headers.Authorization = `Bearer ${res.accessToken}`;
                 return axios(originalRequest);
 
-            } catch (error) {
+            } catch (error: any) {
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
                 window.location.href = "/login";
+
+                console.log("Erro ekak enwa: ", error.message);
 
                 console.error('Token refresh failed:', error);
                 return Promise.reject(error);

@@ -18,8 +18,8 @@ export const AuthProvider = ({ children }: any) => {
                 .catch((err) => {
                     setUser(null);
                     console.log(err)
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');    
+                    // localStorage.removeItem('accessToken');
+                    // localStorage.removeItem('refreshToken');    
                 }).finally(() => {
                     setLoading(false);
                 })

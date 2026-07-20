@@ -30,6 +30,6 @@ export const getMyDetails = async () => {
 }
 
 export const refreshTokens = async (refreshToken: string) => {
-    const res = await api.post('/auth/refresh', { token: refreshToken })
-    return res.data
+    const res = await api.post('/auth/refresh-token', { refreshToken })
+    return res.data.data
 }

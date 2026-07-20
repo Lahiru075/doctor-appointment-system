@@ -51,7 +51,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         Appointment appointment = Appointment.builder()
-                .status(AppointmentStatus.PENDING)
+                .status(AppointmentStatus.CONFIRMED)
                 .patient(patient)
                 .doctor(doctor)
                 .timeSlot(timeSlot)

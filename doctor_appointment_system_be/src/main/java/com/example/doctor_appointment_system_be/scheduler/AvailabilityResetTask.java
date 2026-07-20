@@ -15,6 +15,7 @@ public class AvailabilityResetTask {
     private final TimeSlotRepository timeSlotRepository;
 
     @Scheduled(cron = "0 0 0 * * SUN")
+//    @Scheduled(fixedDelay = 10000)
     @Transactional
     public void resetWeeklySlots() {
         try {
