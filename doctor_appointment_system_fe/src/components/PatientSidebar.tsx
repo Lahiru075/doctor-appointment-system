@@ -4,7 +4,7 @@ import { useAuth } from '../context/authContext';
 import { Heart, LogOut, Activity, Stethoscope, Calendar, Clipboard, Menu, X } from 'lucide-react';
 
 const PatientSidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, setUser } = useAuth();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -14,6 +14,15 @@ const PatientSidebar = () => {
     { path: '/patient-appointments', label: 'My Appointments', icon: Calendar },
     { path: '/patient-prescriptions', label: 'Prescriptions', icon: Clipboard },
   ];
+
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    setUser(null);
+
+    window.location.href = "/login"; 
+  }
 
   return (
     <>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/authContext';
 import { HeartPulse, LogOut, Users, Calendar, Star, User, Menu, X } from 'lucide-react';
 
 const DoctorSidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, setUser } = useAuth();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -16,6 +16,16 @@ const DoctorSidebar = () => {
     { path: '/doctor/reviews', label: 'My Reviews', icon: Star },
     { path: '/doctor/profile', label: 'Profile Setup', icon: User }
   ];
+
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    setUser(null);
+
+    window.location.href = "/login";
+  }
+
 
   return (
     <>
@@ -50,11 +60,10 @@ const DoctorSidebar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border cursor-pointer ${
-                    isActive 
-                      ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-sm shadow-[#082e3e]/10' 
+                  className={`flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border cursor-pointer ${isActive
+                      ? 'bg-[#082e3e] text-white border-[#082e3e] shadow-sm shadow-[#082e3e]/10'
                       : 'text-slate-600 hover:bg-slate-50 border-transparent hover:text-[#082e3e]'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4.5 h-4.5" />
                   <span>{item.label}</span>
@@ -95,7 +104,7 @@ const DoctorSidebar = () => {
       {/* Mobile Sidebar Sliding Drawer */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 md:hidden" onClick={() => setIsSidebarOpen(false)}>
-          <div 
+          <div
             className="fixed top-0 bottom-0 left-0 w-64 bg-white/95 backdrop-blur-md z-55 flex flex-col justify-between p-6 shadow-2xl border-r border-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
@@ -107,14 +116,14 @@ const DoctorSidebar = () => {
                   </div>
                   <span className="font-extrabold text-[#082e3e] text-lg">Clini<span className="text-[#86abc0]">Q</span></span>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsSidebarOpen(false)}
                   className="p-1.5 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-slate-100 text-[#082e3e]"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              
+
               <div className="space-y-1">
                 {navigationItems.map(item => {
                   const Icon = item.icon;
@@ -124,11 +133,10 @@ const DoctorSidebar = () => {
                       key={item.path}
                       to={item.path}
                       onClick={() => setIsSidebarOpen(false)}
-                      className={`w-full flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border ${
-                        isActive 
-                          ? 'bg-[#082e3e] text-white border-[#082e3e]' 
+                      className={`w-full flex items-center space-x-3 text-xs font-bold px-4 py-3 rounded-2xl transition border ${isActive
+                          ? 'bg-[#082e3e] text-white border-[#082e3e]'
                           : 'text-slate-600 hover:bg-slate-50 border-transparent hover:text-[#082e3e]'
-                      }`}
+                        }`}
                     >
                       <Icon className="w-4 h-4" />
                       <span>{item.label}</span>

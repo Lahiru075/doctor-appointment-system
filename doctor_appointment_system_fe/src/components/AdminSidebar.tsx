@@ -1,18 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
-import { 
-  Shield, 
-  LayoutDashboard, 
-  Layers, 
-  UserSquare2, 
-  Users2, 
-  LogOut, 
-  ChevronRight 
+import {
+  Shield,
+  LayoutDashboard,
+  Layers,
+  UserSquare2,
+  Users2,
+  LogOut,
+  ChevronRight
 } from 'lucide-react';
 
 const AdminSidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, setUser } = useAuth();
+
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    setUser(null);
+
+    window.location.href = "/login";
+  }
+
 
   const navItems = [
     {
@@ -43,10 +53,10 @@ const AdminSidebar = () => {
 
   return (
     <aside id="admin-sidebar" className="w-80 bg-white border-r border-[#e3edf2] flex flex-col justify-between h-screen sticky top-0 font-sans shadow-sm shrink-0">
-      
+
       {/* Top Section */}
       <div className="flex flex-col flex-1 overflow-y-auto">
-        
+
         {/* Brand Logo Box */}
         <div className="p-6 border-b border-[#f0f5f8] flex items-center space-x-3.5 bg-gradient-to-b from-[#f8fafc] to-white">
           <div className="p-2.5 bg-[#e3edf2] text-[#082e3e] rounded-2xl border border-white shadow-xs">
@@ -66,7 +76,7 @@ const AdminSidebar = () => {
         <div className="px-6 py-5.5 border-b border-[#f0f5f8]">
           <div className="bg-[#f0f5f8] rounded-[1.5rem] p-4.5 border border-[#e3edf2] relative overflow-hidden group shadow-2xs">
             <div className="absolute right-0 top-0 translate-x-3 -translate-y-3 w-16 h-16 bg-[#082e3e]/5 rounded-full blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-500" />
-            
+
             <div className="relative z-10 flex flex-col space-y-2">
               <span className="text-[9px] uppercase tracking-wider text-[#85abc0] font-bold">
                 Identity Profile
@@ -92,10 +102,9 @@ const AdminSidebar = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center justify-between p-3.5 rounded-[1.25rem] transition-all group cursor-pointer ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[#e3edf2] to-[#f0f5f8] text-[#082e3e] border border-white font-extrabold shadow-3xs'
-                      : 'text-slate-500 hover:text-[#082e3e] hover:bg-[#f8fafc] border border-transparent font-medium'
+                  `flex items-center justify-between p-3.5 rounded-[1.25rem] transition-all group cursor-pointer ${isActive
+                    ? 'bg-gradient-to-r from-[#e3edf2] to-[#f0f5f8] text-[#082e3e] border border-white font-extrabold shadow-3xs'
+                    : 'text-slate-500 hover:text-[#082e3e] hover:bg-[#f8fafc] border border-transparent font-medium'
                   }`
                 }
               >

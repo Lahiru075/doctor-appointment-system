@@ -75,7 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException { // we can use this method skip authentication filter for public endpoints like (login/register/refresh-token)
         String path = request.getRequestURI();
         // The endpoints inside /api/v1/auth/ (login, register, refresh) are excluded from the filter
         return path.contains("/api/v1/auth/");
