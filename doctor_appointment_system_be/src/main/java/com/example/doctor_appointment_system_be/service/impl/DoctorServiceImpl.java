@@ -10,6 +10,7 @@ import com.example.doctor_appointment_system_be.entity.Specialization;
 import com.example.doctor_appointment_system_be.entity.User;
 import com.example.doctor_appointment_system_be.enums.Role;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
+import com.example.doctor_appointment_system_be.mapper.DoctorMapper;
 import com.example.doctor_appointment_system_be.repository.DoctorRepository;
 import com.example.doctor_appointment_system_be.repository.SpecializationRepository;
 import com.example.doctor_appointment_system_be.repository.UserRepository;
@@ -31,6 +32,8 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     private final SpecializationRepository specializationRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final DoctorMapper doctorMapper;
 
     @Override
     @Transactional
@@ -62,33 +65,24 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor savedDoctor = doctorRepository.save(doctor);
 
-        return DoctorResponseDTO.builder()
-                .doctorId(savedDoctor.getId())
-                .userId(savedDoctor.getUser().getId())
-                .fullName(savedDoctor.getUser().getFullName())
-                .email(savedDoctor.getUser().getEmail())
-                .specializationName(savedDoctor.getSpecialization().getName())
-                .biography(savedDoctor.getBiography())
-                .consultationFee(savedDoctor.getConsultationFee())
-                .build();
+        return doctorMapper.toDTO(savedDoctor);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<DoctorResponseDTO> getAll() {
-        return doctorRepository.findAllDoctors().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return doctorMapper.toDTOList(doctorRepository.findAllDoctors());
     }
 
     @Override
-    @Transactional // if we use this.. we do not want (doctorRepository.save(doctor)) this update when transaction commit
+    @Transactional
     public void updateDoctorStatus(Long id) {
 
-        Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+        if (!doctorRepository.existsById(id)){
+            throw new ResourceNotFoundException("Doctor not found with ID: " + id);
+        }
+        userRepository.toggleActiveStatusByDoctorId(id);
 
-        doctor.getUser().setActive(!doctor.getUser().isActive());
     }
 
     @Override
@@ -98,10 +92,6 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
 
-        doctor.setBiography(doctorRegisterDTO.getBiography());
-        doctor.setConsultationFee(doctorRegisterDTO.getConsultationFee());
-        doctor.setExperienceYears(doctorRegisterDTO.getExperienceYears());
-
         if (doctorRegisterDTO.getSpecializationId() != null){
             Specialization specialization = specializationRepository.findById(doctorRegisterDTO.getSpecializationId())
                     .orElseThrow(() -> new ResourceNotFoundException("Specialization not found with ID: " + doctorRegisterDTO.getSpecializationId()));
@@ -109,9 +99,11 @@ public class DoctorServiceImpl implements DoctorService {
             doctor.setSpecialization(specialization);
         }
 
-        Doctor updatedDoctor = doctorRepository.save(doctor);
+        doctor.setBiography(doctorRegisterDTO.getBiography());
+        doctor.setConsultationFee(doctorRegisterDTO.getConsultationFee());
+        doctor.setExperienceYears(doctorRegisterDTO.getExperienceYears());
 
-        return mapToResponse(updatedDoctor);
+        return doctorMapper.toDTO(doctor);
 
     }
 
@@ -119,35 +111,22 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public void deleteDoctor(Long id) {
 
-        Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+        if (!doctorRepository.existsById(id)){
+            throw new ResourceNotFoundException("Doctor not found with ID: " + id);
+        }
+        userRepository.softDeleteByDoctorId(id);
 
-        doctor.getUser().setDeleted(true);
-
-        doctorRepository.save(doctor);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DoctorResponseDTO> searchDoctors(String name, Long specializationId) {
-        return doctorRepository.searchDoctors(name, specializationId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return doctorMapper.toDTOList(doctorRepository.searchDoctors(name, specializationId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DoctorSuggestionDTO> getSuggestions(String query) {
         return doctorRepository.findSuggestions(query);
-    }
-
-    private DoctorResponseDTO mapToResponse(Doctor doctor) {
-        return DoctorResponseDTO.builder()
-                .doctorId(doctor.getId())
-                .userId(doctor.getUser().getId())
-                .fullName(doctor.getUser().getFullName())
-                .email(doctor.getUser().getEmail())
-                .specializationName(doctor.getSpecialization().getName())
-                .biography(doctor.getBiography())
-                .consultationFee(doctor.getConsultationFee())
-                .build();
     }
 }
