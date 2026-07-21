@@ -42,7 +42,7 @@ public class Appointment {
     // One-to-one relationship
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_slot_id", nullable = false, unique = true)
+    @JoinColumn(name = "time_slot_id", unique = true)
     private TimeSlot timeSlot;
 
     @OneToOne(mappedBy = "appointment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

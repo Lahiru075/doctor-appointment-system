@@ -14,10 +14,22 @@ export const bookAppointment = async (bookingRequest: AppointmentRequestDTO): Pr
 export const getPatientAppointments = async (userId: number): Promise<AppointmentResponseDTO[]> => {
     try {
         const response = await api.get(`/appointment/patients/${userId}`);
-        console.log(response)
         return response.data.data;
     } catch (error: any) {
         console.error("Error fetching patient appointments:", error.message);
+        throw error;
+    }
+};
+
+
+export const cancelAppointment = async (appointmentId: number): Promise<void> => {
+
+    console.log(appointmentId)
+
+    try {
+        await api.put(`/appointment/cancel/${appointmentId}`);
+    } catch (error: any) {
+        console.error("Error cancelling appointment:", error.message);
         throw error;
     }
 };

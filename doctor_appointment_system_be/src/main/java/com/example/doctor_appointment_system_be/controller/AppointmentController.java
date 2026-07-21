@@ -42,6 +42,8 @@ public class AppointmentController {
 
         List<AppointmentResponseDTO> response = appointmentService.getMyAppointments(userId);
 
+        System.out.println(response.size());
+
         ApiResponse<List<AppointmentResponseDTO>> apiResponse = ApiResponse.<List<AppointmentResponseDTO>>builder()
                 .success(true)
                 .status(HttpStatus.OK.value())
@@ -52,6 +54,22 @@ public class AppointmentController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
 
+    }
+
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<ApiResponse<Void>> cancelAppointment(@PathVariable Long id){
+
+        appointmentService.cancelAppointment(id);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Appointment canceled successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
 

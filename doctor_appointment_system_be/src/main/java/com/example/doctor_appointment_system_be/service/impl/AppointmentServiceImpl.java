@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -71,5 +72,38 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return appointmentMapper.toDTOList(appointmentRepository.findAppointmentsByUserId(userId));
 
+    }
+
+    @Override
+    @Transactional
+    public void cancelAppointment(Long id) {
+
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED){
+            throw new APIException(HttpStatus.BAD_REQUEST, "This appointment is already cancelled.");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED){
+            throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel a completed appointment.");
+        }
+
+        TimeSlot timeSlot = appointment.getTimeSlot();
+
+        if (timeSlot != null){
+
+            LocalDateTime appointmentDateTime = LocalDateTime.of(timeSlot.getDate(), timeSlot.getStartTime());
+
+            if (LocalDateTime.now().isAfter(appointmentDateTime.minusHours(24))){
+                throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel. Appointments must be cancelled at least 24 hours in advance.");
+            }
+
+            timeSlot.setBooked(false);
+
+            appointment.setTimeSlot(null);
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
     }
 }

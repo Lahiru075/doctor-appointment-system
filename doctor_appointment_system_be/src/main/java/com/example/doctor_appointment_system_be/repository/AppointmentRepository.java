@@ -15,9 +15,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "JOIN FETCH a.doctor d " +
             "JOIN FETCH d.user du " +
             "JOIN FETCH d.specialization s " +
-            "JOIN FETCH a.timeSlot t " +
-            "WHERE a.patient.user.id = :userId " +
-            "ORDER BY t.date DESC, t.startTime DESC") // new data to top
+            "LEFT JOIN FETCH a.timeSlot t " +
+            "JOIN a.patient p " +
+            "JOIN p.user u " +
+            "WHERE u.id = :userId " +
+            "ORDER BY a.id DESC")
     List<Appointment> findAppointmentsByUserId(@Param("userId") Long userId);
 
 }

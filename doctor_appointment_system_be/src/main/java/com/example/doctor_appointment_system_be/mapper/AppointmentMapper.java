@@ -11,8 +11,8 @@ import java.util.List;
 public interface AppointmentMapper {
     @Mapping(target = "doctorName", source = "doctor.user.fullName")
     @Mapping(target = "specializationName", source = "doctor.specialization.name")
-    @Mapping(target = "date", expression = "java(appointment.getTimeSlot().getDate().toString())")
-    @Mapping(target = "time", expression = "java(appointment.getTimeSlot().getStartTime().toString() + \" - \" + appointment.getTimeSlot().getEndTime().toString())")
+    @Mapping(target = "date", expression = "java(appointment.getTimeSlot() != null ? appointment.getTimeSlot().getDate().toString() : \"Cancelled\")")
+    @Mapping(target = "time", expression = "java(appointment.getTimeSlot() != null ? appointment.getTimeSlot().getStartTime().toString() + \" - \" + appointment.getTimeSlot().getEndTime().toString() : \"N/A\")")
     @Mapping(target = "consultationFee", source = "doctor.consultationFee")
     @Mapping(target = "status", expression = "java(appointment.getStatus().name())")
 

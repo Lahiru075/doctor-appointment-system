@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, XCircle, Ban } from 'lucide-react';
 import { useAuth } from '../context/authContext';
-import { getPatientAppointments } from '../services/appointment';
-import type { AppointmentResponseDTO } from '../types/types'; 
+import { getPatientAppointments, cancelAppointment } from '../services/appointment';
+import type { AppointmentResponseDTO } from '../types/types';
 
 const MyAppointments = () => {
     const { user } = useAuth();
@@ -11,23 +11,38 @@ const MyAppointments = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
 
-    // 1. Fetch appointments on mount
+    const fetchAppointments = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getPatientAppointments(user.id);
+            setAppointments(data);
+            console.log(data)
+        } catch (err) {
+            console.error("Failed to load appointments", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchAppointments = async () => {
-            setIsLoading(true);
-            try {
-                const data = await getPatientAppointments(user.id);
-                setAppointments(data);
-            } catch (err) {
-                console.error("Failed to load appointments", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchAppointments();
     }, [user.id]);
 
-    // 2. Filter Appointments
+    const handleCancel = async (appointmentId: number) => {
+        const confirmCancel = window.confirm("Are you sure you want to cancel this appointment?");
+        if (!confirmCancel) return;
+
+        try {
+            await cancelAppointment(appointmentId);
+            alert("Appointment cancelled successfully!");
+
+            fetchAppointments();
+        } catch (err: any) {
+            alert("Failed to cancel: " + err.message);
+        }
+    };
+
+    // Filter Appointments
     const upcomingAppointments = appointments.filter(
         app => app.status === 'CONFIRMED' || app.status === 'PENDING'
     );
@@ -59,7 +74,7 @@ const MyAppointments = () => {
             {/* Top Banner */}
             <div className="bg-gradient-to-br from-[#8eb5ca] via-[#709eb7] to-[#082e3e] rounded-[2.5rem] border border-white p-8 md:p-10 relative overflow-hidden text-white shadow-lg">
                 <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                
+
                 <div className="relative z-10">
                     <div className="inline-flex items-center space-x-1 bg-white/15 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md mb-4 border border-white/10">
                         <Sparkles className="w-3.5 h-3.5" />
@@ -76,22 +91,20 @@ const MyAppointments = () => {
             <div className="bg-white border border-slate-200/50 p-2 rounded-2xl shadow-xs max-w-md flex gap-2">
                 <button
                     onClick={() => setActiveTab('UPCOMING')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        activeTab === 'UPCOMING'
-                            ? 'bg-[#082e3e] text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-slate-50'
-                    }`}
+                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === 'UPCOMING'
+                        ? 'bg-[#082e3e] text-white shadow-sm'
+                        : 'text-slate-400 hover:bg-slate-50'
+                        }`}
                 >
                     <Calendar className="w-4 h-4" />
                     <span>Upcoming ({upcomingAppointments.length})</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('PAST')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        activeTab === 'PAST'
-                            ? 'bg-[#082e3e] text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-slate-50'
-                    }`}
+                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === 'PAST'
+                        ? 'bg-[#082e3e] text-white shadow-sm'
+                        : 'text-slate-400 hover:bg-slate-50'
+                        }`}
                 >
                     <FileText className="w-4 h-4" />
                     <span>Past History ({pastAppointments.length})</span>
@@ -157,7 +170,7 @@ const MyAppointments = () => {
                                 {/* Action Buttons Based on Status */}
                                 <div className="flex gap-2">
                                     {(app.status === 'CONFIRMED' || app.status === 'PENDING') && (
-                                        <button className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-750 border border-rose-150 px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-3xs cursor-pointer">
+                                        <button onClick={() => handleCancel(app.id)} className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-750 border border-rose-150 px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-3xs cursor-pointer">
                                             <Ban className="w-3.5 h-3.5" />
                                             <span>Cancel</span>
                                         </button>
