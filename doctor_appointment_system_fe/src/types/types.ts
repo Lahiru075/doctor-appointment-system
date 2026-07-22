@@ -84,3 +84,11 @@ export interface ReviewRequestDTO {
     rating: number; // 1-5 stars [1]
     comment: string;
 }
+
+export interface ReviewResponseDTO {
+    id: number;
+    rating: number;
+    comment: string;
+    patientName: string;
+    createdAt: string;
+}
