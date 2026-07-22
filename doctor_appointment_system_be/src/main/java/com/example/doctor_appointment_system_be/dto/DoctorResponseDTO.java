@@ -19,5 +19,6 @@ public class DoctorResponseDTO {
     private String specializationName;
     private Double consultationFee;
     private String biography;
+    private Double averageRating;
 
 }

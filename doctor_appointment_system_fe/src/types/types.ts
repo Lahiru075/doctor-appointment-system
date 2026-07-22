@@ -48,6 +48,7 @@ export interface DoctorResponseDTO {
     specializationName: string; 
     consultationFee: number;
     biography: string;
+    averageRating: number;
 }
 
 export interface AvailableTimeSlotDTO {

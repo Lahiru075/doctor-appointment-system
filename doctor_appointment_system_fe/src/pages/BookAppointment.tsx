@@ -105,6 +105,7 @@ const BookAppointment = () => {
 
         try {
             const data = await searchDoctors(searchQuery, selectedSpec);
+            console.log(data)
             setDoctors(data);
         } catch (err) {
             console.error("Failed to search doctors", err);
@@ -270,7 +271,7 @@ const BookAppointment = () => {
                                         </span>
                                         <div className="flex items-center space-x-1 text-amber-500">
                                             <Star className="w-3.5 h-3.5 fill-current" />
-                                            <span className="text-xs font-black">4.9</span>
+                                            <span className="text-xs font-black">{doc.averageRating ? doc.averageRating.toFixed(1) : "0.0"}</span>
                                         </div>
                                     </div>
 
