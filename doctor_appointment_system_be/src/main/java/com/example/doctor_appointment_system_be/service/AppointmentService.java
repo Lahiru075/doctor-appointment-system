@@ -11,4 +11,8 @@ public interface AppointmentService {
     List<AppointmentResponseDTO> getMyAppointments(Long userId);
 
     void cancelAppointment(Long id);
+
+    void completeAppointment(Long id);
+
+    List<AppointmentResponseDTO> getDoctorAppointments(Long userId);
 }

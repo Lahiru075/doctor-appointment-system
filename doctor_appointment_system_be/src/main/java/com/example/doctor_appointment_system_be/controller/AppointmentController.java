@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -66,6 +67,40 @@ public class AppointmentController {
                 .status(HttpStatus.OK.value())
                 .message("Appointment canceled successfully!")
                 .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/complete/{id}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ApiResponse<Void>> completeAppointment(@PathVariable Long id){
+
+        appointmentService.completeAppointment(id);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Appointment completed successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/doctors/{userId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getDoctorAppointments(@PathVariable Long userId) {
+
+        List<AppointmentResponseDTO> response = appointmentService.getDoctorAppointments(userId);
+
+        ApiResponse<List<AppointmentResponseDTO>> apiResponse = ApiResponse.<List<AppointmentResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor appointments fetched successfully!")
+                .data(response)
                 .timestamp(LocalDateTime.now())
                 .build();
 
