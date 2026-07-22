@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, XCircle, Ban } from 'lucide-react';
+import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, XCircle, Ban, MessageSquare, Star, X } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import { getPatientAppointments, cancelAppointment } from '../services/appointment';
+import { addReview } from '../services/review';
 import type { AppointmentResponseDTO } from '../types/types';
 
 const MyAppointments = () => {
@@ -11,12 +12,17 @@ const MyAppointments = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
 
+    const [selectedApptForReview, setSelectedApptForReview] = useState<number | null>(null);
+    const [rating, setRating] = useState<number>(5);
+    const [comment, setComment] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [reviewError, setReviewError] = useState<string | null>(null);
+
     const fetchAppointments = async () => {
         setIsLoading(true);
         try {
             const data = await getPatientAppointments(user.id);
             setAppointments(data);
-            console.log(data)
         } catch (err) {
             console.error("Failed to load appointments", err);
         } finally {
@@ -42,6 +48,31 @@ const MyAppointments = () => {
         }
     };
 
+    const handleSubmitReview = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedApptForReview) return;
+
+        setIsSubmittingReview(true);
+        setReviewError(null);
+
+        try {
+            await addReview({
+                appointmentId: selectedApptForReview,
+                rating,
+                comment
+            });
+            alert("Review submitted successfully!");
+            setSelectedApptForReview(null);
+            setComment('');
+            setRating(5);
+            fetchAppointments();
+        } catch (err: any) {
+            setReviewError(err.response?.data?.message || "Failed to submit review. Please try again.");
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
     // Filter Appointments
     const upcomingAppointments = appointments.filter(
         app => app.status === 'CONFIRMED' || app.status === 'PENDING'
@@ -58,8 +89,6 @@ const MyAppointments = () => {
         switch (status) {
             case 'CONFIRMED':
                 return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-            case 'PENDING':
-                return 'bg-amber-50 text-amber-700 border-amber-100';
             case 'COMPLETED':
                 return 'bg-slate-50 text-slate-700 border-slate-200/50';
             case 'CANCELLED':
@@ -176,7 +205,11 @@ const MyAppointments = () => {
                                         </button>
                                     )}
                                     {app.status === 'COMPLETED' && (
-                                        <button className="flex items-center gap-1.5 bg-[#e3edf2] hover:bg-[#d0e0eb] text-[#0a4053] border border-white px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-3xs cursor-pointer">
+                                        <button
+                                            onClick={() => setSelectedApptForReview(app.id)}
+                                            className="flex items-center gap-1.5 bg-[#e3edf2] hover:bg-[#d0e0eb] text-[#0a4053] border border-white px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-3xs cursor-pointer"
+                                        >
+                                            <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
                                             <span>Add Review</span>
                                         </button>
                                     )}
@@ -199,6 +232,104 @@ const MyAppointments = () => {
                     </p>
                 </div>
             )}
+
+            <AnimatePresence>
+                {selectedApptForReview && (
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white border border-slate-200/50 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-[#f8fafc]">
+                                <div>
+                                    <h3 className="text-lg font-black text-[#082e3e]">Rate Your Consultation</h3>
+                                    <p className="text-[11px] text-slate-400 font-bold uppercase mt-0.5">Appt ID: #{selectedApptForReview}</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setSelectedApptForReview(null);
+                                        setReviewError(null);
+                                        setComment('');
+                                    }}
+                                    className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition cursor-pointer"
+                                >
+                                    <X className="w-4 h-4 text-slate-500" />
+                                </button>
+                            </div>
+
+                            {/* Modal Body / Form */}
+                            <form onSubmit={handleSubmitReview} className="p-6 space-y-6">
+                                {/* Validation Error Alert */}
+                                {reviewError && (
+                                    <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex gap-2.5 text-xs text-red-800 font-semibold leading-normal">
+                                        <AlertCircle className="w-4.5 h-4.5 text-red-500 shrink-0 mt-0.5" />
+                                        <span>{reviewError}</span>
+                                    </div>
+                                )}
+
+                                {/* Star Rating Selector */}
+                                <div className="space-y-3 text-center">
+                                    <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Tap to Rate (1-5 Stars) [1]</span>
+                                    <div className="flex justify-center gap-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => setRating(star)}
+                                                className="transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+                                            >
+                                                <Star className={`w-8 h-8 ${star <= rating ? 'text-amber-400 fill-current' : 'text-slate-200'}`} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Comment Area */}
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider">Write Your Review</label>
+                                    <div className="relative">
+                                        <MessageSquare className="absolute left-4 top-4.5 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+                                        <textarea
+                                            placeholder="Tell us about your consultation experience..."
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            rows={3}
+                                            className="w-full bg-[#f8fafc] border border-slate-200 rounded-2xl pl-11 pr-4 py-3.5 font-bold text-xs text-[#082e3e] focus:outline-none focus:ring-2 focus:ring-[#8eb5ca]/30 focus:border-[#8eb5ca] resize-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Modal Footer / Buttons */}
+                                <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedApptForReview(null);
+                                            setReviewError(null);
+                                            setComment('');
+                                        }}
+                                        className="px-5 py-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl font-bold text-xs cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmittingReview}
+                                        className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-black text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                                    >
+                                        {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                        <span>Submit Review</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
         </div>
     );
 };

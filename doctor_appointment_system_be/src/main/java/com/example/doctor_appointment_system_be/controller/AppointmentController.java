@@ -106,6 +106,4 @@ public class AppointmentController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
-
 }

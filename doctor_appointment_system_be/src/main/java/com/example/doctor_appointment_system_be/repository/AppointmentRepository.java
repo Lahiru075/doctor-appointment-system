@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -31,4 +32,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND a.status = 'CONFIRMED' " +
             "ORDER BY a.id DESC")
     List<Appointment> findAppointmentsByDoctorUserId(@Param("userId") Long userId);
+
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient p JOIN FETCH a.doctor d WHERE a.id = :id")
+    Optional<Appointment> findByIdWithPatientAndDoctor(@Param("id") Long id);
 }

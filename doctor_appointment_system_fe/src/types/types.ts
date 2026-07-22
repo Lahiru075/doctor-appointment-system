@@ -75,3 +75,11 @@ export interface AppointmentResponseDTO {
     consultationFee: number;
     status: string;
 }
+
+// reviews
+
+export interface ReviewRequestDTO {
+    appointmentId: number;
+    rating: number; // 1-5 stars [1]
+    comment: string;
+}
