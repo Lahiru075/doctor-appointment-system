@@ -50,3 +50,13 @@ export const getDoctorAppointments = async (doctorId: number): Promise<Appointme
         throw error;
     }
 };
+
+export const getDoctorAppointmentsHistory = async (userId: number): Promise<AppointmentResponseDTO[]> => {
+    try {
+        const response = await api.get(`/appointment/doctor-history/${userId}`);
+        return response.data.data; 
+    } catch (error: any) {
+        console.error("Error fetching doctor history:", error.message);
+        throw error;
+    }
+};

@@ -81,6 +81,7 @@ export interface AppointmentResponseDTO {
     time: string;
     consultationFee: number;
     status: string;
+    patientName?: string;
 }
 
 // reviews

@@ -106,4 +106,21 @@ public class AppointmentController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/doctor-history/{userId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getDoctorAppointmentsHistory(@PathVariable Long userId){
+
+        List<AppointmentResponseDTO> response = appointmentService.getDoctorAppointmentsHistory(userId);
+
+        ApiResponse<List<AppointmentResponseDTO>> apiResponse = ApiResponse.<List<AppointmentResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor history appointments fetched successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

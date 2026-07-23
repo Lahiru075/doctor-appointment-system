@@ -10,6 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AppointmentMapper {
     @Mapping(target = "doctorName", source = "doctor.user.fullName")
+    @Mapping(target = "patientName", expression = "java(appointment.getPatient() != null && appointment.getPatient().getUser() != null ? appointment.getPatient().getUser().getFullName() : \"N/A\")")
     @Mapping(target = "specializationName", source = "doctor.specialization.name")
     @Mapping(target = "date", expression = "java(appointment.getTimeSlot() != null ? appointment.getTimeSlot().getDate().toString() : \"Cancelled\")")
     @Mapping(target = "time", expression = "java(appointment.getTimeSlot() != null ? appointment.getTimeSlot().getStartTime().toString() + \" - \" + appointment.getTimeSlot().getEndTime().toString() : \"N/A\")")

@@ -15,4 +15,6 @@ public interface AppointmentService {
     void completeAppointment(Long id);
 
     List<AppointmentResponseDTO> getDoctorAppointments(Long userId);
+
+    List<AppointmentResponseDTO> getDoctorAppointmentsHistory(Long userId);
 }

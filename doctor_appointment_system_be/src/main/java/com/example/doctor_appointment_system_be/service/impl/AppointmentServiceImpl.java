@@ -132,4 +132,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<Appointment> appointments = appointmentRepository.findAppointmentsByDoctorUserId(userId);
         return appointmentMapper.toDTOList(appointments);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getDoctorAppointmentsHistory(Long userId) {
+        List<Appointment> appointments = appointmentRepository.findAllDoctorAppointmentsHistory(userId);
+        return appointmentMapper.toDTOList(appointments);
+    }
 }

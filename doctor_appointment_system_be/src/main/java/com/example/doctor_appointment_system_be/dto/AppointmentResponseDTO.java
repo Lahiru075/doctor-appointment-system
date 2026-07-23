@@ -9,6 +9,7 @@ import lombok.*;
 public class AppointmentResponseDTO {
     private Long id;
     private String doctorName;
+    private String patientName;
     private String specializationName;
     private String date;
     private String time;
