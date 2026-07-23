@@ -19,4 +19,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "WHERE r.doctor.id = :doctorId " +
             "ORDER BY r.createdAt DESC")
     List<Review> findReviewsByDoctorId(@Param("doctorId") Long doctorId);
+
+    @Query("SELECT r FROM Review r " +
+            "JOIN FETCH r.patient p " +
+            "JOIN FETCH p.user u " +
+            "WHERE r.doctor.user.id = :userId " +
+            "ORDER BY r.createdAt DESC")
+    List<Review> findReviewsByDoctorUserId(@Param("userId") Long userId);
 }

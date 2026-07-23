@@ -53,4 +53,22 @@ public class ReviewController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+
+    @GetMapping("/doctor-reviews/{userId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ApiResponse<List<ReviewResponseDTO>>> getDoctorReviews(@PathVariable Long userId) {
+
+        List<ReviewResponseDTO> reviews = reviewService.getDoctorReviews(userId);
+
+        ApiResponse<List<ReviewResponseDTO>> apiResponse = ApiResponse.<List<ReviewResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor reviews fetched successfully!")
+                .data(reviews)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

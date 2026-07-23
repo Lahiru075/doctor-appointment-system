@@ -19,3 +19,13 @@ export const getDoctorReviews = async (doctorId: number): Promise<ReviewResponse
         throw error;
     }
 };
+
+export const getDoctorOwnReviews = async (userId: number): Promise<ReviewResponseDTO[]> => {
+    try {
+        const response = await api.get(`/reviews/doctor-reviews/${userId}`);
+        return response.data.data; 
+    } catch (error: any) {
+        console.error("Error fetching doctor's own reviews:", error.message);
+        throw error;
+    }
+};

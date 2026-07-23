@@ -10,4 +10,6 @@ public interface ReviewService {
     void addReview(@Valid ReviewRequestDTO reviewRequestDTO);
 
     List<ReviewResponseDTO> getReviewsByDoctorId(Long doctorId);
+
+    List<ReviewResponseDTO> getDoctorReviews(Long userId);
 }

@@ -64,4 +64,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviewMapper.toDTOList(reviewRepository.findReviewsByDoctorId(doctorId));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDTO> getDoctorReviews(Long userId) {
+        List<Review> reviews = reviewRepository.findReviewsByDoctorUserId(userId);
+        return reviewMapper.toDTOList(reviews);
+    }
 }
