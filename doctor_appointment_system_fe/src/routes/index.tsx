@@ -18,6 +18,7 @@ const MyAppointments = lazy(() => import('../pages/MyAppointments'))
 const DoctorProfile = lazy(() => import('../pages/DoctorProfile'))
 const DoctorAppintments = lazy(() => import('../pages/DoctorAppointments'))
 const MyReviews = lazy(() => import('../pages/MyReviews'))
+const ManagePatients = lazy(() => import('../pages/ManagePatients'))
 
 type RequireAuthType = { children: ReactNode, role?: string[] }
 
@@ -173,6 +174,16 @@ function index() {
                                 </RequireAuth>
                             }
                         />
+
+                        <Route
+                            path="/admin/patients"
+                            element={
+                                <RequireAuth role={['ADMIN']}>
+                                    <ManagePatients />
+                                </RequireAuth>
+                            }
+                        />
+
                     </Route>
 
                 </Routes>

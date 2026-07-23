@@ -99,3 +99,16 @@ export interface ReviewResponseDTO {
     patientName: string;
     createdAt: string;
 }
+
+// patient
+
+export interface PatientResponseDTO {
+    id: number;
+    userId: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string | null;
+    bloodGroup: string | null;
+    medicalHistory: string | null;
+    isActive: boolean; 
+}

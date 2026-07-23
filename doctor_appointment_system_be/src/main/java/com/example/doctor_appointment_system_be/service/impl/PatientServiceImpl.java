@@ -53,14 +53,13 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    @Transactional
     public void deletePatient(Long id) {
 
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + id));
 
         patient.getUser().setDeleted(true);
-
-        patientRepository.save(patient);
     }
 
     @Override
@@ -71,6 +70,7 @@ public class PatientServiceImpl implements PatientService {
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + id));
 
         patient.getUser().setActive(!patient.getUser().isActive());
+
     }
 
     private PatientResponseDTO mapToResponse(Patient patient) {
