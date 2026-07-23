@@ -1,9 +1,6 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
-import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorSuggestionDTO;
-import com.example.doctor_appointment_system_be.dto.PatientResponseDTO;
+import com.example.doctor_appointment_system_be.dto.*;
 import com.example.doctor_appointment_system_be.entity.Doctor;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.Specialization;
@@ -128,5 +125,28 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional(readOnly = true)
     public List<DoctorSuggestionDTO> getSuggestions(String query) {
         return doctorRepository.findSuggestions(query);
+    }
+
+    @Override
+    @Transactional
+    public DoctorResponseDTO updateDoctorProfile(DoctorProfileUpdateDTO doctorProfileUpdateDTO, Long userId) {
+
+        Doctor existDoctor = doctorRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with user ID: " + userId));
+
+        existDoctor.setBiography(doctorProfileUpdateDTO.getBiography());
+        existDoctor.setConsultationFee(doctorProfileUpdateDTO.getConsultationFee());
+        existDoctor.setExperienceYears(doctorProfileUpdateDTO.getExperienceYears());
+
+        return doctorMapper.toDTO(existDoctor);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DoctorResponseDTO getDoctorProfile(Long userId) {
+        Doctor doctor = doctorRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found for User ID: " + userId));
+
+        return doctorMapper.toDTO(doctor);
     }
 }

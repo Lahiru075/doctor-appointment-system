@@ -1,9 +1,6 @@
 package com.example.doctor_appointment_system_be.controller;
 
-import com.example.doctor_appointment_system_be.dto.ApiResponse;
-import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
-import com.example.doctor_appointment_system_be.dto.DoctorSuggestionDTO;
+import com.example.doctor_appointment_system_be.dto.*;
 import com.example.doctor_appointment_system_be.service.DoctorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -141,6 +138,41 @@ public class DoctorController {
                 .status(HttpStatus.OK.value())
                 .message("Suggestions fetched successfully!")
                 .data(suggestions)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("profile/{userId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<ApiResponse<DoctorResponseDTO>> updateDoctorProfile(
+            @Valid @RequestBody DoctorProfileUpdateDTO doctorProfileUpdateDTO,
+            @PathVariable Long userId
+    ){
+        DoctorResponseDTO response = doctorService.updateDoctorProfile(doctorProfileUpdateDTO, userId);
+
+        ApiResponse<DoctorResponseDTO> apiResponse = ApiResponse.<DoctorResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Profile updated successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<ApiResponse<DoctorResponseDTO>> getDoctorProfile(@PathVariable Long userId) {
+
+        DoctorResponseDTO response = doctorService.getDoctorProfile(userId);
+
+        ApiResponse<DoctorResponseDTO> apiResponse = ApiResponse.<DoctorResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor profile fetched successfully!")
+                .data(response)
                 .timestamp(LocalDateTime.now())
                 .build();
 

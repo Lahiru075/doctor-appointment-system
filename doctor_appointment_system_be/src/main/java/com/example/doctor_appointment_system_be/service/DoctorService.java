@@ -1,8 +1,10 @@
 package com.example.doctor_appointment_system_be.service;
 
+import com.example.doctor_appointment_system_be.dto.DoctorProfileUpdateDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorRegisterDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorSuggestionDTO;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -20,4 +22,8 @@ public interface DoctorService {
     List<DoctorResponseDTO> searchDoctors(String name, Long specializationId);
 
     List<DoctorSuggestionDTO> getSuggestions(String query);
+
+    DoctorResponseDTO updateDoctorProfile(@Valid DoctorProfileUpdateDTO doctorProfileUpdateDTO, Long userId);
+
+    DoctorResponseDTO getDoctorProfile(Long userId);
 }

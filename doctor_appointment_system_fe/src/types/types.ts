@@ -59,6 +59,12 @@ export interface AvailableTimeSlotDTO {
     isBooked: boolean;
 }
 
+export interface DoctorProfileUpdateDTO {
+    biography: string;
+    consultationFee: number;
+    experienceYears: number;
+}
+
 // appointments
 
 export interface AppointmentRequestDTO {

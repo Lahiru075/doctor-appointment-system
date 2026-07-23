@@ -34,11 +34,9 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     @Override
     @Transactional
     public void generateWeeklySlots(Long userId, WeeklyScheduleDTO dto) {
-        Doctor doctor = doctorRepository.findByUserId(userId);
+        Doctor doctor = doctorRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found for this User ID"));
 
-        if (doctor == null) {
-            throw new ResourceNotFoundException("Doctor not found for this User ID");
-        }
 
         timeSlotRepository.deleteByDoctorIdAndIsBookedFalse(doctor.getId());
 
@@ -82,11 +80,8 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     @Override
     @Transactional(readOnly = true)
     public WeeklyScheduleDTO getAvailability(Long userId) {
-        Doctor doctor = doctorRepository.findByUserId(userId);
-
-        if (doctor == null) {
-            throw new ResourceNotFoundException("Doctor not found for this User ID");
-        }
+        Doctor doctor = doctorRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found for this User ID"));
 
         List<TimeSlot> slots = timeSlotRepository.findByDoctorIdAndDateGreaterThanEqual(doctor.getId(), LocalDate.now());
 
