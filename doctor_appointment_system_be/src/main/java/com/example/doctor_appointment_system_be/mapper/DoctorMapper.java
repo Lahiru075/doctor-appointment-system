@@ -17,6 +17,8 @@ public interface DoctorMapper {
     @Mapping(target = "specializationName", source = "specialization.name")
 
     @Mapping(target = "averageRating", expression = "java(calculateAverageRating(doctor.getReviews()))")
+    @Mapping(target = "active", source = "user.active")
+
     DoctorResponseDTO toDTO(Doctor doctor);
 
     List<DoctorResponseDTO> toDTOList(List<Doctor> doctors);

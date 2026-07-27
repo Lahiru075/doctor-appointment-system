@@ -39,11 +39,30 @@ export interface Specialization {
     description: string;
 }
 
+export interface DoctorRegisterDTO {
+    fullName: string;
+    email: string;
+    password: string;
+    phoneNumber?: string;
+    experienceYears: number;
+    specializationId: number;
+    biography?: string;
+    consultationFee: number;
+}
+
+export interface DoctorUpdateDTO {
+    specializationId: number;
+    biography?: string;
+    consultationFee: number;
+    experienceYears: number;
+}
+
 export interface DoctorResponseDTO {
     id: number;
     userId: number;
     fullName: string;
     email: string;
+    active: boolean;
     experienceYears: number;
     specializationName: string; 
     consultationFee: number;

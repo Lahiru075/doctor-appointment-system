@@ -58,6 +58,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .specialization(specialization)
                 .biography(doctorRegisterDTO.getBiography())
                 .consultationFee(doctorRegisterDTO.getConsultationFee())
+                .experienceYears(doctorRegisterDTO.getExperienceYears())
                 .build();
 
         Doctor savedDoctor = doctorRepository.save(doctor);
@@ -84,21 +85,21 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     @Transactional
-    public DoctorResponseDTO updateDoctor(Long id, DoctorRegisterDTO doctorRegisterDTO) {
+    public DoctorResponseDTO updateDoctor(Long id, DoctorUpdateDTO doctorUpdateDTO) {
 
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
 
-        if (doctorRegisterDTO.getSpecializationId() != null){
-            Specialization specialization = specializationRepository.findById(doctorRegisterDTO.getSpecializationId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Specialization not found with ID: " + doctorRegisterDTO.getSpecializationId()));
+        if (doctorUpdateDTO.getSpecializationId() != null){
+            Specialization specialization = specializationRepository.findById(doctorUpdateDTO.getSpecializationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Specialization not found with ID: " + doctorUpdateDTO.getSpecializationId()));
 
             doctor.setSpecialization(specialization);
         }
 
-        doctor.setBiography(doctorRegisterDTO.getBiography());
-        doctor.setConsultationFee(doctorRegisterDTO.getConsultationFee());
-        doctor.setExperienceYears(doctorRegisterDTO.getExperienceYears());
+        doctor.setBiography(doctorUpdateDTO.getBiography());
+        doctor.setConsultationFee(doctorUpdateDTO.getConsultationFee());
+        doctor.setExperienceYears(doctorUpdateDTO.getExperienceYears());
 
         return doctorMapper.toDTO(doctor);
 

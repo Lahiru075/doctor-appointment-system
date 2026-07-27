@@ -75,10 +75,10 @@ public class DoctorController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<DoctorResponseDTO>> updateDoctor(
             @PathVariable Long id,
-            @RequestBody DoctorRegisterDTO doctorRegisterDTO)
+            @Valid @RequestBody DoctorUpdateDTO  doctorUpdateDTO)
     {
 
-        DoctorResponseDTO response = doctorService.updateDoctor(id, doctorRegisterDTO);
+        DoctorResponseDTO response = doctorService.updateDoctor(id, doctorUpdateDTO);
 
         ApiResponse<DoctorResponseDTO> apiResponse = ApiResponse.<DoctorResponseDTO>builder()
                 .success(true)

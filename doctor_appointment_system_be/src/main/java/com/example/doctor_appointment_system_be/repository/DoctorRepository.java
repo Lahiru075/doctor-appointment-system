@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
-    @Query("SELECT d FROM Doctor d JOIN FETCH d.user u JOIN FETCH d.specialization WHERE u.deleted = false")
+    @Query("SELECT d FROM Doctor d JOIN FETCH d.user u JOIN FETCH d.specialization s WHERE u.deleted = false")
     List<Doctor> findAllDoctors();
 
     Optional<Doctor> findByUserId(Long userId);

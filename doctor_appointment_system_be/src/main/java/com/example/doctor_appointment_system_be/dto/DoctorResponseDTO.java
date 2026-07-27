@@ -15,6 +15,7 @@ public class DoctorResponseDTO {
     private Long userId;
     private String fullName;
     private String email;
+    private Boolean active;
     private Integer experienceYears;
     private String specializationName;
     private Double consultationFee;
