@@ -131,3 +131,16 @@ export interface PatientResponseDTO {
     medicalHistory: string | null;
     isActive: boolean; 
 }
+
+// specialization
+
+export interface SpecializationDTO {
+    name: string;
+    description: string;
+}
+
+export interface SpecializationResponseDTO {
+    id: number;
+    name: string;
+    description: string;
+}
