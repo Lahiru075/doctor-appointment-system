@@ -144,3 +144,18 @@ export interface SpecializationResponseDTO {
     name: string;
     description: string;
 }
+
+// admin dashboard
+
+export interface ChartDataDTO {
+    date: string;
+    count: number;
+}
+
+export interface AdminDashboardDTO {
+    totalDoctors: number;
+    totalPatients: number;
+    totalSpecializations: number;
+    totalAppointments: number;
+    appointmentTrends: ChartDataDTO[];
+}
