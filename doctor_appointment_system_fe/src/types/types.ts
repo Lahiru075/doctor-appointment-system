@@ -132,6 +132,11 @@ export interface PatientResponseDTO {
     isActive: boolean; 
 }
 
+export interface PatientUpdateDTO {
+    bloodGroup: string;
+    medicalHistory: string;
+}
+
 // specialization
 
 export interface SpecializationDTO {
@@ -158,4 +163,12 @@ export interface AdminDashboardDTO {
     totalSpecializations: number;
     totalAppointments: number;
     appointmentTrends: ChartDataDTO[];
+}
+
+// change password
+
+export interface PasswordChangeDTO {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
 }

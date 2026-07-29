@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
-import { Heart, LogOut, Activity, Stethoscope, Calendar, Clipboard, Menu, X } from 'lucide-react';
+import { Heart, LogOut, Activity, Stethoscope, Calendar, Clipboard, Menu, X, UserCog } from 'lucide-react';
 
 const PatientSidebar = () => {
   const { user, setUser } = useAuth();
@@ -13,6 +13,7 @@ const PatientSidebar = () => {
     { path: '/patient-book', label: 'Book Appointment', icon: Stethoscope },
     { path: '/patient-appointments', label: 'My Appointments', icon: Calendar },
     { path: '/patient-prescriptions', label: 'Prescriptions', icon: Clipboard },
+    { path: '/patient-profile', label: 'Profile Settings', icon: UserCog }, 
   ];
 
   const logout = () => {

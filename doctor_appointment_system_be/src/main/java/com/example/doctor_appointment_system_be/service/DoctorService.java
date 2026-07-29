@@ -23,4 +23,6 @@ public interface DoctorService {
     DoctorResponseDTO updateDoctorProfile(@Valid DoctorProfileUpdateDTO doctorProfileUpdateDTO, Long userId);
 
     DoctorResponseDTO getDoctorProfile(Long userId);
+
+    void changePassword(@Valid PasswordChangeDTO passwordChangeDTO, Long userId);
 }

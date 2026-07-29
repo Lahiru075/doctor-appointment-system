@@ -1,12 +1,16 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
+import com.example.doctor_appointment_system_be.dto.PasswordChangeDTO;
 import com.example.doctor_appointment_system_be.dto.PatientRequestDTO;
 import com.example.doctor_appointment_system_be.dto.PatientResponseDTO;
+import com.example.doctor_appointment_system_be.dto.PatientUpdateDTO;
 import com.example.doctor_appointment_system_be.entity.Patient;
+import com.example.doctor_appointment_system_be.exception.InvalidPasswordException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
 import com.example.doctor_appointment_system_be.repository.PatientRepository;
 import com.example.doctor_appointment_system_be.service.PatientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,6 +88,51 @@ public class PatientServiceImpl implements PatientService {
                 .bloodGroup(patient.getBloodGroup())
                 .medicalHistory(patient.getMedicalHistory())
                 .isActive(patient.getUser().isActive())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long userId, PasswordChangeDTO dto) {
+
+        Patient patient = patientRepository.findWithUserByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), patient.getUser().getPassword())) {
+            throw new InvalidPasswordException("Old password does not match");
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new InvalidPasswordException("Passwords do not match");
+        } 
+
+        patient.getUser().setPassword(passwordEncoder.encode(dto.getNewPassword()));
+    }
+
+    @Override
+    @Transactional
+    public void updatePatientProfile(Long userId, PatientUpdateDTO dto) {
+
+        Patient patient = patientRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient profile not found"));
+
+        patient.setBloodGroup(dto.getBloodGroup());
+        patient.setMedicalHistory(dto.getMedicalHistory());
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PatientResponseDTO getPatientProfile(Long userId) {
+        Patient patient = patientRepository.findWithUserByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+
+        return PatientResponseDTO.builder()
+                .id(patient.getId())
+                .fullName(patient.getUser().getFullName())
+                .email(patient.getUser().getEmail())
+                .bloodGroup(patient.getBloodGroup())
+                .medicalHistory(patient.getMedicalHistory())
                 .build();
     }
 }

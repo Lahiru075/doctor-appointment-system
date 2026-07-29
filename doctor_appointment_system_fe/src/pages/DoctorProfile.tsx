@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Clipboard, DollarSign, Award, Save, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { User, Clipboard, DollarSign, Award, Save, Loader2, CheckCircle2, AlertCircle, Sparkles, Lock, KeyRound, X } from 'lucide-react';
 import { useAuth } from '../context/authContext';
-import { updateDoctorProfile, getDoctorProfile } from '../services/doctor'; 
-import type { DoctorResponseDTO } from "../types/types";
+import { updateDoctorProfile, getDoctorProfile } from '../services/doctor';
+import { changeDoctorPassword } from '../services/doctor';
+import type { DoctorResponseDTO, PasswordChangeDTO } from "../types/types";
 
 const DoctorProfile = () => {
     const { user } = useAuth();
-    
+
     // Form and Data States
     const [profile, setProfile] = useState<DoctorResponseDTO>({
         id: 0,
         userId: 0,
         fullName: '',
         email: '',
+        active: true,
         experienceYears: 5,
         specializationName: '',
         consultationFee: 2000,
@@ -26,6 +28,15 @@ const DoctorProfile = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
+
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordData, setPasswordData] = useState<PasswordChangeDTO>({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadProfileData = async () => {
@@ -50,7 +61,7 @@ const DoctorProfile = () => {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (profile.consultationFee <= 0) {
             setValidationError("Consultation fee must be a positive number.");
             return;
@@ -64,7 +75,7 @@ const DoctorProfile = () => {
         setValidationError(null);
 
         try {
-          
+
             await updateDoctorProfile(user.id, {
                 biography: profile.biography,
                 consultationFee: profile.consultationFee,
@@ -80,9 +91,27 @@ const DoctorProfile = () => {
         }
     };
 
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordError(null);
+        setPasswordLoading(true);
+
+        try {
+            await changeDoctorPassword(user.id, passwordData);
+            setToastMessage("Password updated successfully!");
+            setIsPasswordModalOpen(false);
+            setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+            setTimeout(() => setToastMessage(null), 4000);
+        } catch (err: any) {
+            setPasswordError(err || "Failed to change password.");
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-16 animate-in fade-in duration-300">
-            
+
             {/* Toast Notification */}
             <AnimatePresence>
                 {toastMessage && (
@@ -124,11 +153,11 @@ const DoctorProfile = () => {
                 </div>
             ) : (
                 <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                    
+
                     {/* Left Column: Read-only Identity Card (1 column) */}
                     <div className="md:col-span-1 bg-white border border-slate-200/50 rounded-[2.25rem] p-6 shadow-xs space-y-5 text-left">
                         <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider mb-2">Verified Identity</span>
-                        
+
                         <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100">
                             <div className="p-3 bg-[#e3edf2] text-[#0a4053] rounded-2xl border border-white shadow-3xs shrink-0">
                                 <User className="w-5 h-5" />
@@ -151,6 +180,16 @@ const DoctorProfile = () => {
                                 </span>
                             </div>
                         </div>
+
+                        {/* // */}
+                        <button
+                            type="button"
+                            onClick={() => setIsPasswordModalOpen(true)}
+                            className="w-full mt-4 flex items-center justify-center gap-2 py-3.5 bg-[#e3edf2] hover:bg-[#d0e0eb] border border-[#8eb5ca]/40 rounded-2xl text-[10px] font-black uppercase text-[#082e3e] transition-all cursor-pointer shadow-sm active:scale-[0.98] group"
+                        >
+                            <Lock className="w-3.5 h-3.5 text-[#0a4053] group-hover:scale-110 transition-transform" />
+                            Update Credentials
+                        </button>
                     </div>
 
                     {/* Right Column: Editable Profile Fields (2 columns) */}
@@ -225,6 +264,80 @@ const DoctorProfile = () => {
                     </div>
                 </form>
             )}
+            {/* // */}
+            <AnimatePresence>
+                {isPasswordModalOpen && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#082e3e]/40 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white w-full max-w-md rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-[#082e3e] text-white rounded-xl shadow-lg shadow-[#082e3e]/20">
+                                        <KeyRound className="w-4 h-4" />
+                                    </div>
+                                    <h3 className="font-black text-[#082e3e] text-sm uppercase tracking-tight">Change Password</h3>
+                                </div>
+                                <button onClick={() => setIsPasswordModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handlePasswordChange} className="p-8 space-y-5">
+                                {passwordError && (
+                                    <div className="bg-red-50 border border-red-100 p-3.5 rounded-2xl text-[11px] text-red-600 font-bold flex gap-2 items-center">
+                                        <AlertCircle className="w-4 h-4 shrink-0" />
+                                        {passwordError}
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5 text-left">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Current Password</label>
+                                        <input
+                                            required type="password"
+                                            value={passwordData.oldPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                                            className="w-full bg-[#f8fafc] border border-slate-200 rounded-2xl px-4 py-3 font-bold text-xs focus:ring-2 focus:ring-[#8eb5ca]/30 focus:border-[#8eb5ca] outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 text-left">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">New Password</label>
+                                        <input
+                                            required type="password"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                            className="w-full bg-[#f8fafc] border border-slate-200 rounded-2xl px-4 py-3 font-bold text-xs focus:ring-2 focus:ring-[#8eb5ca]/30 focus:border-[#8eb5ca] outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 text-left">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Confirm New Password</label>
+                                        <input
+                                            required type="password"
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                            className="w-full bg-[#f8fafc] border border-slate-200 rounded-2xl px-4 py-3 font-bold text-xs focus:ring-2 focus:ring-[#8eb5ca]/30 focus:border-[#8eb5ca] outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={passwordLoading}
+                                    className="w-full bg-[#082e3e] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-[#082e3e]/20 hover:bg-[#0a4053] transition-all flex justify-center items-center gap-2"
+                                >
+                                    {passwordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    Confirm Change
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import api from "./api"
-import type  {DoctorSuggestion, DoctorResponseDTO, DoctorProfileUpdateDTO, DoctorRegisterDTO, DoctorUpdateDTO } from "../types/types";
+import type  {DoctorSuggestion, DoctorResponseDTO, DoctorProfileUpdateDTO, DoctorRegisterDTO, DoctorUpdateDTO, PasswordChangeDTO, PatientUpdateDTO  } from "../types/types";
 
 
 export const getDoctorSuggestions = async (query: string): Promise<DoctorSuggestion[]> => {
@@ -46,7 +46,6 @@ export const getDoctorProfile = async (userId: number): Promise<DoctorResponseDT
     }
 };
 
-
 export const toggleDoctorStatus = async (id: number): Promise<void> => {
     try{
 
@@ -57,7 +56,6 @@ export const toggleDoctorStatus = async (id: number): Promise<void> => {
     }
 };
 
-
 export const deleteDoctor = async (id: number): Promise<void> => {
     try{
         await api.delete(`/doctors/${id}`);
@@ -66,7 +64,6 @@ export const deleteDoctor = async (id: number): Promise<void> => {
         throw error;
     }
 };
-
 
 export const registerDoctor = async (doctorData: DoctorRegisterDTO): Promise<void> => {
     try {
@@ -77,7 +74,6 @@ export const registerDoctor = async (doctorData: DoctorRegisterDTO): Promise<voi
     }
 };
 
-
 export const updateDoctorByAdmin = async (
     doctorId: number, 
     doctorData: DoctorUpdateDTO
@@ -87,5 +83,14 @@ export const updateDoctorByAdmin = async (
     } catch (error: any) {
         console.error("Error updating doctor by admin:", error.message);
         throw error;
+    }
+};
+
+
+export const changeDoctorPassword = async (userId: number, data: PasswordChangeDTO): Promise<void> => {
+    try {
+        await api.put(`/doctors/change-password/${userId}`, data);
+    } catch (error: any) {
+        throw error.response?.data?.message || "Failed to change password. Please try again.";
     }
 };

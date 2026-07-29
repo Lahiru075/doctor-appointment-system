@@ -6,6 +6,8 @@ import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.Specialization;
 import com.example.doctor_appointment_system_be.entity.User;
 import com.example.doctor_appointment_system_be.enums.Role;
+import com.example.doctor_appointment_system_be.exception.APIException;
+import com.example.doctor_appointment_system_be.exception.InvalidPasswordException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
 import com.example.doctor_appointment_system_be.mapper.DoctorMapper;
 import com.example.doctor_appointment_system_be.repository.DoctorRepository;
@@ -13,6 +15,7 @@ import com.example.doctor_appointment_system_be.repository.SpecializationReposit
 import com.example.doctor_appointment_system_be.repository.UserRepository;
 import com.example.doctor_appointment_system_be.service.DoctorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -149,5 +152,22 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found for User ID: " + userId));
 
         return doctorMapper.toDTO(doctor);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(PasswordChangeDTO dto, Long userId) {
+        Doctor doctor = doctorRepository.findWithUserByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with user ID: " + userId));
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), doctor.getUser().getPassword())){
+            throw new InvalidPasswordException("Old password incorrect");
+        }
+
+        if (!dto.getConfirmPassword().equals(dto.getNewPassword())){
+            throw new InvalidPasswordException("Passwords do not match");
+        }
+
+        doctor.getUser().setPassword(passwordEncoder.encode(dto.getNewPassword()));
     }
 }

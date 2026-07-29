@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
-import { HeartPulse, LogOut, Users, Calendar, Star, User, Menu, X } from 'lucide-react';
+import { HeartPulse, LogOut, Users, Calendar, Star, User, Menu, X, UserCog } from 'lucide-react';
 
 const DoctorSidebar = () => {
   const { user, setUser } = useAuth();
@@ -14,7 +14,7 @@ const DoctorSidebar = () => {
     { path: '/doctor/appointments', label: 'Referral Approvals', icon: Calendar },
     { path: '/doctor-availability', label: 'Manage Slots', icon: Calendar },
     { path: '/doctor/reviews', label: 'My Reviews', icon: Star },
-    { path: '/doctor/profile', label: 'Profile Setup', icon: User }
+    { path: '/doctor/profile', label: 'Profile Setup', icon: User },
   ];
 
   const logout = () => {

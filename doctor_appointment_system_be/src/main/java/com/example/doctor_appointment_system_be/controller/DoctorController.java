@@ -178,4 +178,23 @@ public class DoctorController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PutMapping("/change-password/{userId}")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @PathVariable Long userId,
+            @Valid @RequestBody PasswordChangeDTO passwordChangeDTO
+    ) {
+
+        doctorService.changePassword(passwordChangeDTO, userId);
+
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Doctor password changed successfully!")
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

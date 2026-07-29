@@ -1,9 +1,8 @@
 package com.example.doctor_appointment_system_be.controller;
 
-import com.example.doctor_appointment_system_be.dto.ApiResponse;
-import com.example.doctor_appointment_system_be.dto.PatientRequestDTO;
-import com.example.doctor_appointment_system_be.dto.PatientResponseDTO;
+import com.example.doctor_appointment_system_be.dto.*;
 import com.example.doctor_appointment_system_be.service.PatientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ public class PatientController {
     private final PatientService patientService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PatientResponseDTO>>> getAllPatients(){
+    public ResponseEntity<ApiResponse<List<PatientResponseDTO>>> getAllPatients() {
 
         List<PatientResponseDTO> patients = patientService.getAllPatients();
 
@@ -41,7 +40,7 @@ public class PatientController {
     public ResponseEntity<ApiResponse<PatientResponseDTO>> updatePatient(
             @PathVariable Long id,
             @RequestBody PatientRequestDTO patientRequestDTO
-    ){
+    ) {
 
         PatientResponseDTO response = patientService.updatePatient(id, patientRequestDTO);
 
@@ -59,7 +58,7 @@ public class PatientController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deletePatient(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deletePatient(@PathVariable Long id) {
 
         patientService.deletePatient(id);
 
@@ -76,7 +75,7 @@ public class PatientController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> togglePatientStatus(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> togglePatientStatus(@PathVariable Long id) {
         patientService.togglePatientStatus(id);
 
         ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
@@ -89,4 +88,48 @@ public class PatientController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @PutMapping("/change-password/{userId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @PathVariable Long userId,
+            @Valid @RequestBody PasswordChangeDTO dto
+    ) {
+        patientService.changePassword(userId, dto);
+
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Password changed successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @PutMapping("/profile-update/{userId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<ApiResponse<Void>> updateProfile(
+            @PathVariable Long userId,
+            @RequestBody PatientUpdateDTO dto
+    ) {
+        patientService.updatePatientProfile(userId, dto);
+
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Patient profile updated successfully")
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    @GetMapping("/profile/{userId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<ApiResponse<PatientResponseDTO>> getProfile(@PathVariable Long userId) {
+        return ResponseEntity.ok(ApiResponse.<PatientResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .data(patientService.getPatientProfile(userId))
+                .message("Profile retrieved")
+                .build());
+    }
+
 }
