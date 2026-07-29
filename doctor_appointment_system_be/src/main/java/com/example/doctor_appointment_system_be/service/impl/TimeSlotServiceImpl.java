@@ -127,9 +127,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     @Override
     public List<AvailableTimeSlotDTO> getAvailableSlots(Long doctorId) {
 
-        List<TimeSlot> slots = timeSlotRepository.findAvailableSlots(doctorId, LocalDate.now());
-
-        System.out.println(slots.size());
+        List<TimeSlot> slots = timeSlotRepository.findAvailableSlots(doctorId, LocalDate.now(), LocalTime.now());
 
         return slots.stream().map(s -> new AvailableTimeSlotDTO(
                 s.getId().toString(),

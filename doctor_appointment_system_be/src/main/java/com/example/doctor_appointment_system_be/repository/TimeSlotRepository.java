@@ -23,10 +23,11 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
     @Query("SELECT t FROM TimeSlot t WHERE t.doctor.id = :doctorId " +
             "AND t.isBooked = false " +
-            "AND t.date >= :today " +
+            "AND (t.date > :today OR (t.date = :today AND t.startTime > :now)) " +
             "ORDER BY t.date ASC, t.startTime ASC")
     List<TimeSlot> findAvailableSlots(
             @Param("doctorId") Long doctorId,
-            @Param("today") LocalDate today
+            @Param("today") LocalDate today,
+            @Param("now") LocalTime now
     );
 }

@@ -7,6 +7,7 @@ import com.example.doctor_appointment_system_be.dto.PatientUpdateDTO;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.exception.InvalidPasswordException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
+import com.example.doctor_appointment_system_be.mapper.PatientMapper;
 import com.example.doctor_appointment_system_be.repository.PatientRepository;
 import com.example.doctor_appointment_system_be.service.PatientService;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +24,14 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PatientMapper patientMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<PatientResponseDTO> getAllPatients() {
 
-        return patientRepository.findAllActivePatients().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return patientMapper.toDTOList(patientRepository.findAllActivePatients());
+
     }
 
     @Override
@@ -53,7 +54,7 @@ public class PatientServiceImpl implements PatientService {
 
         Patient updatedPatient = patientRepository.save(patient);
 
-        return mapToResponse(updatedPatient);
+        return patientMapper.toDTO(updatedPatient);
 
     }
 
@@ -78,19 +79,6 @@ public class PatientServiceImpl implements PatientService {
 
     }
 
-    private PatientResponseDTO mapToResponse(Patient patient) {
-        return PatientResponseDTO.builder()
-                .id(patient.getId())
-                .userId(patient.getUser().getId())
-                .fullName(patient.getUser().getFullName())
-                .email(patient.getUser().getEmail())
-                .phoneNumber(patient.getUser().getPhoneNumber())
-                .bloodGroup(patient.getBloodGroup())
-                .medicalHistory(patient.getMedicalHistory())
-                .isActive(patient.getUser().isActive())
-                .build();
-    }
-
     @Override
     @Transactional
     public void changePassword(Long userId, PasswordChangeDTO dto) {
@@ -104,7 +92,7 @@ public class PatientServiceImpl implements PatientService {
 
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
             throw new InvalidPasswordException("Passwords do not match");
-        } 
+        }
 
         patient.getUser().setPassword(passwordEncoder.encode(dto.getNewPassword()));
     }
@@ -127,12 +115,6 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = patientRepository.findWithUserByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
-        return PatientResponseDTO.builder()
-                .id(patient.getId())
-                .fullName(patient.getUser().getFullName())
-                .email(patient.getUser().getEmail())
-                .bloodGroup(patient.getBloodGroup())
-                .medicalHistory(patient.getMedicalHistory())
-                .build();
+        return patientMapper.toDTO(patient);
     }
 }
