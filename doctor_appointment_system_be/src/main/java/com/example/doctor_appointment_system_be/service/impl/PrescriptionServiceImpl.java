@@ -1,11 +1,13 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
 import com.example.doctor_appointment_system_be.dto.PrescriptionRequestDTO;
+import com.example.doctor_appointment_system_be.dto.PrescriptionResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Appointment;
 import com.example.doctor_appointment_system_be.entity.Prescription;
 import com.example.doctor_appointment_system_be.enums.AppointmentStatus;
 import com.example.doctor_appointment_system_be.exception.APIException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
+import com.example.doctor_appointment_system_be.mapper.PrescriptionMapper;
 import com.example.doctor_appointment_system_be.repository.AppointmentRepository;
 import com.example.doctor_appointment_system_be.repository.PrescriptionRepository;
 import com.example.doctor_appointment_system_be.service.PrescriptionService;
@@ -14,12 +16,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
     private final AppointmentRepository appointmentRepository;
+    private final PrescriptionMapper prescriptionMapper;
 
     @Override
     @Transactional
@@ -47,5 +52,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .build();
         
         prescriptionRepository.save(prescription);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PrescriptionResponseDTO> getPatientPrescriptions(Long userId) {
+        return prescriptionMapper.toDTOList(prescriptionRepository.findByPatientUserId(userId));
     }
 }

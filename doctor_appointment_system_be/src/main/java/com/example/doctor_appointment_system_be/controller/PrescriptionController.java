@@ -9,12 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequestMapping("/api/v1/prescriptions")
 @RestController
@@ -40,5 +38,22 @@ public class PrescriptionController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
 
+    }
+
+    @GetMapping("/patient/{userId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<ApiResponse<List<PrescriptionResponseDTO>>> getPatientPrescriptions(@PathVariable Long userId) {
+
+        List<PrescriptionResponseDTO> response = prescriptionService.getPatientPrescriptions(userId);
+
+        ApiResponse<List<PrescriptionResponseDTO>> apiResponse = ApiResponse.<List<PrescriptionResponseDTO>>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Prescriptions fetched successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

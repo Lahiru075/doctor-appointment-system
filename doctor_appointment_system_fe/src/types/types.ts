@@ -180,3 +180,14 @@ export interface PrescriptionRequestDTO {
     diagnosis: string;
     medications: string;
 }
+
+export interface PrescriptionResponseDTO {
+    id: number;
+    appointmentId: number;
+    doctorName: string;
+    specializationName: string;
+    patientName: string;
+    diagnosis: string;
+    medications: string;
+    createdAt: string;
+}
