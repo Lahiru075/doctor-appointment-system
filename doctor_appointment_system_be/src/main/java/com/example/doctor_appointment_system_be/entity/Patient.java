@@ -34,4 +34,7 @@ public class Patient {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Review> reviews;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Prescription> prescriptions;
 }

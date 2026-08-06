@@ -73,23 +73,6 @@ public class AppointmentController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/complete/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ApiResponse<Void>> completeAppointment(@PathVariable Long id){
-
-        appointmentService.completeAppointment(id);
-
-        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
-                .success(true)
-                .status(HttpStatus.OK.value())
-                .message("Appointment completed successfully!")
-                .data(null)
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
     @GetMapping("/doctors/{userId}")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getDoctorAppointments(@PathVariable Long userId) {

@@ -107,24 +107,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
     }
 
-    @Override
-    @Transactional
-    public void completeAppointment(Long id) {
-
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
-
-        if (appointment.getStatus() == AppointmentStatus.CANCELLED){
-            throw new APIException(HttpStatus.BAD_REQUEST, "Cannot complete a canceled appointment.");
-        }
-
-        if (appointment.getStatus() == AppointmentStatus.COMPLETED){
-            throw new APIException(HttpStatus.BAD_REQUEST, "This appointment already completed.");
-        }
-
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-
-    }
 
     @Override
     @Transactional(readOnly = true)

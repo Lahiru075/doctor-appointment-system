@@ -172,3 +172,11 @@ export interface PasswordChangeDTO {
     newPassword: string;
     confirmPassword: string;
 }
+
+// prescription
+
+export interface PrescriptionRequestDTO {
+    appointmentId: number;
+    diagnosis: string;
+    medications: string;
+}
