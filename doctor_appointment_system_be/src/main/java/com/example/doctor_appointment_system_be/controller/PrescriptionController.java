@@ -56,4 +56,21 @@ public class PrescriptionController {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/appointment/{appointmentId}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
+    public ResponseEntity<ApiResponse<PrescriptionResponseDTO>> getPrescriptionByAppointmentId(@PathVariable Long appointmentId) {
+
+        PrescriptionResponseDTO response = prescriptionService.getPrescriptionByAppointmentId(appointmentId);
+
+        ApiResponse<PrescriptionResponseDTO> apiResponse = ApiResponse.<PrescriptionResponseDTO>builder()
+                .success(true)
+                .status(HttpStatus.OK.value())
+                .message("Prescription fetched successfully!")
+                .data(response)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 }

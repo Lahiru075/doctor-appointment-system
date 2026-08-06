@@ -9,4 +9,6 @@ public interface PrescriptionService {
     void createPrescription(PrescriptionRequestDTO prescriptionRequestDTO);
 
     List<PrescriptionResponseDTO> getPatientPrescriptions(Long userId);
+
+    PrescriptionResponseDTO getPrescriptionByAppointmentId(Long appointmentId);
 }
