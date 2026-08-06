@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, DollarSign, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, Ban } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, Ban, Stethoscope, Pill, X, Search } from 'lucide-react';
 import { useAuth } from '../context/authContext';
-import { getDoctorAppointmentsHistory } from '../services/appointment'; 
-import type { AppointmentResponseDTO } from '../types/types';
+import { getDoctorAppointmentsHistory } from '../services/appointment';
+import { getPrescriptionByAppointmentId } from '../services/prescription';
+import type { AppointmentResponseDTO, PrescriptionResponseDTO } from '../types/types';
 
 const DoctorAppointments = () => {
     const { user } = useAuth();
     const [appointments, setAppointments] = useState<AppointmentResponseDTO[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
+    const [searchQuery, setSearchQuery] = useState('');
 
+    // --- STATES FOR PRESCRIPTION MODAL ---
+    const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionResponseDTO | null>(null);
+    const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+    const [isLoadingPrescription, setIsLoadingPrescription] = useState(false);
+
+    // Fetch Appointments History
     const fetchHistory = async () => {
         setIsLoading(true);
         try {
             const data = await getDoctorAppointmentsHistory(user.id);
-            console.log(data)
             setAppointments(data);
         } catch (err) {
             console.error("Failed to load clinical history", err);
@@ -27,26 +35,44 @@ const DoctorAppointments = () => {
         fetchHistory();
     }, [user.id]);
 
+    // View Prescription Logic
+    const handleViewPrescription = async (appointmentId: number) => {
+        setIsPrescriptionModalOpen(true);
+        setIsLoadingPrescription(true);
+        setSelectedPrescription(null);
+
+        try {
+            const data = await getPrescriptionByAppointmentId(appointmentId);
+            setSelectedPrescription(data);
+        } catch (err) {
+            console.error("Failed to load prescription", err);
+        } finally {
+            setIsLoadingPrescription(false);
+        }
+    };
+
+    // --- FILTER LOGIC ---
     const upcomingAppointments = appointments.filter(
         app => app.status === 'CONFIRMED' || app.status === 'PENDING'
     );
-
     const pastAppointments = appointments.filter(
         app => app.status === 'COMPLETED' || app.status === 'CANCELLED'
     );
-
     const displayedAppointments = activeTab === 'UPCOMING' ? upcomingAppointments : pastAppointments;
 
+    // Search Bar Filtering 
+    const filteredAppointments = displayedAppointments.filter(app =>
+        (app.patientName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (app.patientEmail?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    );
+
+    // Helper: Status badge style
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'CONFIRMED':
-                return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-            case 'COMPLETED':
-                return 'bg-slate-50 text-slate-700 border-slate-200/50';
-            case 'CANCELLED':
-                return 'bg-rose-50 text-rose-700 border-rose-100';
-            default:
-                return 'bg-slate-50 text-slate-600 border-slate-150';
+            case 'CONFIRMED': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'COMPLETED': return 'bg-slate-50 text-slate-700 border-slate-200/50';
+            case 'CANCELLED': return 'bg-rose-50 text-rose-700 border-rose-100';
+            default: return 'bg-slate-50 text-slate-600 border-slate-150';
         }
     };
 
@@ -55,7 +81,6 @@ const DoctorAppointments = () => {
             {/* Top Banner */}
             <div className="bg-gradient-to-br from-[#8eb5ca] via-[#709eb7] to-[#082e3e] rounded-[2.5rem] border border-white p-8 md:p-10 relative overflow-hidden text-white shadow-lg">
                 <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                
                 <div className="relative z-10 text-left">
                     <div className="inline-flex items-center space-x-1 bg-white/15 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md mb-4 border border-white/10">
                         <Sparkles className="w-3.5 h-3.5" />
@@ -68,30 +93,37 @@ const DoctorAppointments = () => {
                 </div>
             </div>
 
-            {/* Custom Tab Switcher */}
-            <div className="bg-white border border-slate-200/50 p-2 rounded-2xl shadow-xs max-w-md flex gap-2">
-                <button
-                    onClick={() => setActiveTab('UPCOMING')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        activeTab === 'UPCOMING'
-                            ? 'bg-[#082e3e] text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-slate-50'
-                    }`}
-                >
-                    <Calendar className="w-4 h-4" />
-                    <span>Upcoming ({upcomingAppointments.length})</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('PAST')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                        activeTab === 'PAST'
-                            ? 'bg-[#082e3e] text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-slate-50'
-                    }`}
-                >
-                    <FileText className="w-4 h-4" />
-                    <span>Past History ({pastAppointments.length})</span>
-                </button>
+            {/* Controls Row: Tab Switcher & Search Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                {/* Custom Tab Switcher */}
+                <div className="bg-white border border-slate-200/50 p-2 rounded-2xl shadow-xs w-full md:max-w-md flex gap-2">
+                    <button
+                        onClick={() => setActiveTab('UPCOMING')}
+                        className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === 'UPCOMING' ? 'bg-[#082e3e] text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >
+                        <Calendar className="w-4 h-4" />
+                        <span>Upcoming ({upcomingAppointments.length})</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('PAST')}
+                        className={`flex-1 py-3 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === 'PAST' ? 'bg-[#082e3e] text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >
+                        <FileText className="w-4 h-4" />
+                        <span>Past History ({pastAppointments.length})</span>
+                    </button>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative w-full md:max-w-md">
+                    <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                    <input
+                        type="text"
+                        placeholder="Search patients by name or email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-white border border-slate-200/60 rounded-2xl pl-12 pr-4 py-3.5 font-bold text-xs text-[#082e3e] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8eb5ca]/30 focus:border-[#8eb5ca] shadow-xs"
+                    />
+                </div>
             </div>
 
             {/* Appointments Grid */}
@@ -99,38 +131,31 @@ const DoctorAppointments = () => {
                 <div className="h-64 flex items-center justify-center">
                     <Loader2 className="w-8 h-8 text-[#082e3e] animate-spin" />
                 </div>
-            ) : displayedAppointments.length > 0 ? (
+            ) : filteredAppointments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {displayedAppointments.map((app) => (
-                        <div
-                            key={app.id}
-                            className="bg-white border border-slate-200/50 rounded-[2.25rem] p-6 hover:border-slate-300 transition-all flex flex-col justify-between shadow-xs relative overflow-hidden"
-                        >
+                    {filteredAppointments.map((app) => (
+                        <div key={app.id} className="bg-white border border-slate-200/50 rounded-[2.25rem] p-6 hover:border-slate-300 transition-all flex flex-col justify-between shadow-xs relative overflow-hidden">
                             <div className="space-y-4">
-                                {/* Header: Status and ID */}
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/20">
-                                        APPT ID: #{app.id}
-                                    </span>
-                                    <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${getStatusStyle(app.status)}`}>
-                                        {app.status}
-                                    </span>
+                                    <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/20">APPT ID: #{app.id}</span>
+                                    <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${getStatusStyle(app.status)}`}>{app.status}</span>
                                 </div>
 
-                                {/* Patient Details */}
                                 <div className="flex gap-4 items-start pt-2">
                                     <div className="p-3 bg-[#e3edf2] text-[#0a4053] rounded-2xl border border-white shadow-3xs shrink-0">
                                         <User className="w-5 h-5 text-[#0a4053]" />
                                     </div>
                                     <div className="text-left">
                                         <h4 className="text-base font-black text-[#082e3e]">{app.patientName || "Patient"}</h4>
-                                        <span className="text-[10px] font-black uppercase text-[#85abc0] tracking-wider block mt-0.5">
+                                        <span className="text-[10px] font-bold text-slate-400 block mt-0.5">
+                                            {app.patientEmail || "No email provided"}
+                                        </span>
+                                        <span className="text-[10px] font-black uppercase text-[#85abc0] tracking-wider block mt-1">
                                             Outpatient Consultation
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Date & Time Grid */}
                                 <div className="grid grid-cols-2 gap-3 pt-2">
                                     <div className="bg-[#f8fafc] border border-slate-200/30 p-3 rounded-2xl flex items-center gap-2.5 text-xs font-semibold text-[#0a4053]">
                                         <Calendar className="w-4 h-4 text-[#85abc0]" />
@@ -143,15 +168,20 @@ const DoctorAppointments = () => {
                                 </div>
                             </div>
 
-                            {/* Footer: Earnings */}
                             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-left">
                                 <div>
                                     <span className="text-[9px] text-slate-400 font-bold uppercase block">Consultation Earnings</span>
                                     <span className="text-sm font-black text-[#082e3e]">LKR {app.consultationFee.toLocaleString()}</span>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right flex gap-2">
                                     {app.status === 'COMPLETED' && (
-                                        <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl uppercase">Discharged</span>
+                                        <button
+                                            onClick={() => handleViewPrescription(app.id)}
+                                            className="text-[10px] font-extrabold text-[#0a4053] hover:text-white bg-[#e3edf2] hover:bg-[#082e3e] border border-[#8eb5ca]/30 px-3 py-1.5 rounded-xl uppercase transition-colors cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <FileText className="w-3.5 h-3.5" />
+                                            View Script
+                                        </button>
                                     )}
                                     {app.status === 'CANCELLED' && (
                                         <span className="text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-xl uppercase">Cancelled</span>
@@ -165,19 +195,96 @@ const DoctorAppointments = () => {
                     ))}
                 </div>
             ) : (
-                /* Empty Placeholder */
                 <div className="bg-white/40 border border-slate-200/50 border-dashed rounded-[2.5rem] p-16 text-center">
                     <div className="p-4 bg-[#e3edf2] text-[#0a4053] rounded-full inline-block border border-white mb-4">
                         <AlertCircle className="w-6 h-6" />
                     </div>
                     <h4 className="text-base font-black text-[#082e3e] uppercase tracking-wider">No Records Found</h4>
                     <p className="text-slate-400 text-xs font-bold leading-relaxed max-w-sm mx-auto mt-2">
-                        {activeTab === 'UPCOMING'
-                            ? "You do not have any upcoming clinical sessions scheduled at the moment."
-                            : "Your past clinical consultation history is currently empty."}
+                        No appointments found matching your search.
                     </p>
                 </div>
             )}
+
+            {/* --- PRESCRIPTION VIEWER MODAL --- */}
+            <AnimatePresence>
+                {isPrescriptionModalOpen && (
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white border border-slate-200/50 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden text-left"
+                        >
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-[#f8fafc]">
+                                <div>
+                                    <h3 className="text-lg font-black text-[#082e3e]">Issued Prescription</h3>
+                                    <p className="text-[11px] text-slate-400 font-bold uppercase mt-0.5">Clinical Record File</p>
+                                </div>
+                                <button
+                                    onClick={() => setIsPrescriptionModalOpen(false)}
+                                    className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition cursor-pointer"
+                                >
+                                    <X className="w-4 h-4 text-slate-500" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 min-h-[16rem]">
+                                {isLoadingPrescription ? (
+                                    <div className="h-full flex flex-col items-center justify-center space-y-3 pt-10">
+                                        <Loader2 className="w-8 h-8 text-[#082e3e] animate-spin" />
+                                        <span className="text-xs font-bold text-slate-400">Loading prescription data...</span>
+                                    </div>
+                                ) : selectedPrescription ? (
+                                    <div className="space-y-5">
+                                        <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                                            <div className="flex items-center gap-2 text-[#85abc0] font-bold text-xs">
+                                                <Calendar className="w-4 h-4" />
+                                                <span>{selectedPrescription.createdAt}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/20">
+                                                RX ID: #{selectedPrescription.id}
+                                            </span>
+                                        </div>
+
+                                        <div className="bg-rose-50/50 border border-rose-100/50 rounded-2xl p-4 flex gap-3 items-start">
+                                            <Stethoscope className="w-4.5 h-4.5 text-rose-500 mt-0.5 shrink-0" />
+                                            <div>
+                                                <span className="block text-[10px] font-black uppercase text-rose-400 tracking-wider mb-1">Clinical Diagnosis</span>
+                                                <span className="text-sm font-bold text-rose-950">{selectedPrescription.diagnosis}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-[#f8fafc] border border-slate-200/40 rounded-2xl p-4 flex gap-3 items-start">
+                                            <Pill className="w-4.5 h-4.5 text-[#85abc0] mt-0.5 shrink-0" />
+                                            <div className="w-full">
+                                                <span className="block text-[10px] font-black uppercase text-[#85abc0] tracking-wider mb-2">Prescribed Medications</span>
+                                                <div className="text-xs text-[#082e3e] font-semibold leading-relaxed whitespace-pre-wrap">
+                                                    {selectedPrescription.medications}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-center pt-10">
+                                        <AlertCircle className="w-8 h-8 text-slate-300 mb-2" />
+                                        <p className="text-slate-400 text-xs font-bold">Prescription not found or not issued yet.</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-5 border-t border-slate-100 bg-[#f8fafc] flex justify-end">
+                                <button
+                                    onClick={() => setIsPrescriptionModalOpen(false)}
+                                    className="px-6 py-2.5 bg-[#082e3e] hover:bg-[#0a4053] text-white rounded-xl font-bold text-xs cursor-pointer shadow-sm"
+                                >
+                                    Close Viewer
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

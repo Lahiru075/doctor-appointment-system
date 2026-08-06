@@ -59,4 +59,13 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public List<PrescriptionResponseDTO> getPatientPrescriptions(Long userId) {
         return prescriptionMapper.toDTOList(prescriptionRepository.findByPatientUserId(userId));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PrescriptionResponseDTO getPrescriptionByAppointmentId(Long appointmentId) {
+        Prescription prescription = prescriptionRepository.findByAppointmentIdWithDetails(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Prescription not found for this appointment"));
+
+        return prescriptionMapper.toDTO(prescription);
+    }
 }

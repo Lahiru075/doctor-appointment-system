@@ -20,3 +20,13 @@ export const getPatientPrescriptions = async (userId: number): Promise<Prescript
         throw error;
     }
 };
+
+export const getPrescriptionByAppointmentId = async (appointmentId: number): Promise<PrescriptionResponseDTO> => {
+    try {
+        const response = await api.get(`/prescriptions/appointment/${appointmentId}`);
+        return response.data.data;
+    } catch (error: any) {
+        console.error("Error fetching prescription:", error.message);
+        throw error;
+    }
+};

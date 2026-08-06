@@ -96,6 +96,7 @@ export interface AppointmentResponseDTO {
     id: number;
     doctorName: string;
     specializationName: string;
+    patientEmail?: string;
     date: string;
     time: string;
     consultationFee: number;

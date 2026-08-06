@@ -11,6 +11,7 @@ public class AppointmentResponseDTO {
     private String doctorName;
     private String patientName;
     private String specializationName;
+    private String patientEmail;
     private String date;
     private String time;
     private Double consultationFee;
