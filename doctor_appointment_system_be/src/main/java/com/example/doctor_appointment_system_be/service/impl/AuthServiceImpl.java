@@ -1,16 +1,17 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
-import com.example.doctor_appointment_system_be.dto.LoginResponse;
-import com.example.doctor_appointment_system_be.dto.LoginDTO;
-import com.example.doctor_appointment_system_be.dto.RegisterDTO;
-import com.example.doctor_appointment_system_be.dto.RegisterResponse;
+import com.example.doctor_appointment_system_be.dto.*;
+import com.example.doctor_appointment_system_be.entity.AuditLog;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.User;
+import com.example.doctor_appointment_system_be.enums.ActivityType;
 import com.example.doctor_appointment_system_be.enums.Role;
 import com.example.doctor_appointment_system_be.exception.APIException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
+import com.example.doctor_appointment_system_be.repository.AuditLogRepository;
 import com.example.doctor_appointment_system_be.repository.PatientRepository;
 import com.example.doctor_appointment_system_be.repository.UserRepository;
+import com.example.doctor_appointment_system_be.service.AuditLogService;
 import com.example.doctor_appointment_system_be.service.AuthService;
 import com.example.doctor_appointment_system_be.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -61,6 +63,14 @@ public class AuthServiceImpl implements AuthService {
         // then save patient to patient table
         patientRepository.save(patient);
 
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(savedUser.getId())
+                .userEmail(savedUser.getEmail())
+                .activityType(ActivityType.SECURITY)
+                .action("New user registered successfully with role: " + user.getRole().name())
+                .build());
+
         return RegisterResponse.builder()
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
@@ -89,6 +99,14 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(user.getId())
+                .userEmail(user.getEmail())
+                .activityType(ActivityType.SECURITY)
+                .action("User logged in successfully as " + user.getRole().name())
+                .build());
 
         return LoginResponse.builder()
                 .accessToken(accessToken)

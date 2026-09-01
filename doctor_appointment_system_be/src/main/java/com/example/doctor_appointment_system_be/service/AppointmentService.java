@@ -2,6 +2,7 @@ package com.example.doctor_appointment_system_be.service;
 
 import com.example.doctor_appointment_system_be.dto.AppointmentRequestDTO;
 import com.example.doctor_appointment_system_be.dto.AppointmentResponseDTO;
+import com.example.doctor_appointment_system_be.entity.Appointment;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface AppointmentService {
     List<AppointmentResponseDTO> getDoctorAppointments(Long userId);
 
     List<AppointmentResponseDTO> getDoctorAppointmentsHistory(Long userId);
+
+    void completeAppointment(Appointment appointment);
+
 }

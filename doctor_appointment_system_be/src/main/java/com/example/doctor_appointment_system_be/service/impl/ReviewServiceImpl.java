@@ -1,9 +1,11 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
+import com.example.doctor_appointment_system_be.dto.AuditLogRequestDTO;
 import com.example.doctor_appointment_system_be.dto.ReviewRequestDTO;
 import com.example.doctor_appointment_system_be.dto.ReviewResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Appointment;
 import com.example.doctor_appointment_system_be.entity.Review;
+import com.example.doctor_appointment_system_be.enums.ActivityType;
 import com.example.doctor_appointment_system_be.enums.AppointmentStatus;
 import com.example.doctor_appointment_system_be.exception.APIException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
@@ -11,6 +13,7 @@ import com.example.doctor_appointment_system_be.mapper.ReviewMapper;
 import com.example.doctor_appointment_system_be.repository.AppointmentRepository;
 import com.example.doctor_appointment_system_be.repository.DoctorRepository;
 import com.example.doctor_appointment_system_be.repository.ReviewRepository;
+import com.example.doctor_appointment_system_be.service.AuditLogService;
 import com.example.doctor_appointment_system_be.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
     private final ReviewMapper reviewMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -52,6 +56,16 @@ public class ReviewServiceImpl implements ReviewService {
                 .build();
 
         reviewRepository.save(review);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(appointment.getPatient().getUser().getId())
+                .userEmail(appointment.getPatient().getUser().getEmail())
+                .actorName(appointment.getPatient().getUser().getFullName())
+                .action("Submitted " + review.getRating() + " star review for Dr. " + appointment.getDoctor().getUser().getFullName())
+                .activityType(ActivityType.REVIEW)
+                .build());
+
     }
 
     @Override

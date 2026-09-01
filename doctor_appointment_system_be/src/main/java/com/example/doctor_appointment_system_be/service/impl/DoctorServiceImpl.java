@@ -5,6 +5,7 @@ import com.example.doctor_appointment_system_be.entity.Doctor;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.Specialization;
 import com.example.doctor_appointment_system_be.entity.User;
+import com.example.doctor_appointment_system_be.enums.ActivityType;
 import com.example.doctor_appointment_system_be.enums.Role;
 import com.example.doctor_appointment_system_be.exception.APIException;
 import com.example.doctor_appointment_system_be.exception.InvalidPasswordException;
@@ -13,6 +14,7 @@ import com.example.doctor_appointment_system_be.mapper.DoctorMapper;
 import com.example.doctor_appointment_system_be.repository.DoctorRepository;
 import com.example.doctor_appointment_system_be.repository.SpecializationRepository;
 import com.example.doctor_appointment_system_be.repository.UserRepository;
+import com.example.doctor_appointment_system_be.service.AuditLogService;
 import com.example.doctor_appointment_system_be.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     private final SpecializationRepository specializationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     private final DoctorMapper doctorMapper;
 
@@ -79,10 +82,18 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public void updateDoctorStatus(Long id) {
 
-        if (!doctorRepository.existsById(id)){
-            throw new ResourceNotFoundException("Doctor not found with ID: " + id);
-        }
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
         userRepository.toggleActiveStatusByDoctorId(id);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(doctor.getUser().getId())
+                .userEmail(doctor.getUser().getEmail())
+                .actorName("ADMIN")
+                .activityType(ActivityType.SECURITY)
+                .action("Toggled status for Dr. " + doctor.getUser().getFullName())
+                .build());
 
     }
 
@@ -112,10 +123,19 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public void deleteDoctor(Long id) {
 
-        if (!doctorRepository.existsById(id)){
-            throw new ResourceNotFoundException("Doctor not found with ID: " + id);
-        }
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + id));
+
         userRepository.softDeleteByDoctorId(id);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(doctor.getUser().getId())
+                .userEmail(doctor.getUser().getEmail())
+                .actorName("ADMIN")
+                .activityType(ActivityType.SECURITY)
+                .action("Soft deleted Dr. " + doctor.getUser().getFullName())
+                .build());
 
     }
 

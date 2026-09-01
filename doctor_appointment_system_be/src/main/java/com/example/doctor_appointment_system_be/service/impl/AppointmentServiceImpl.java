@@ -2,11 +2,13 @@ package com.example.doctor_appointment_system_be.service.impl;
 
 import com.example.doctor_appointment_system_be.dto.AppointmentRequestDTO;
 import com.example.doctor_appointment_system_be.dto.AppointmentResponseDTO;
+import com.example.doctor_appointment_system_be.dto.AuditLogRequestDTO;
 import com.example.doctor_appointment_system_be.dto.DoctorResponseDTO;
 import com.example.doctor_appointment_system_be.entity.Appointment;
 import com.example.doctor_appointment_system_be.entity.Doctor;
 import com.example.doctor_appointment_system_be.entity.Patient;
 import com.example.doctor_appointment_system_be.entity.TimeSlot;
+import com.example.doctor_appointment_system_be.enums.ActivityType;
 import com.example.doctor_appointment_system_be.enums.AppointmentStatus;
 import com.example.doctor_appointment_system_be.exception.APIException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
@@ -16,6 +18,7 @@ import com.example.doctor_appointment_system_be.repository.DoctorRepository;
 import com.example.doctor_appointment_system_be.repository.PatientRepository;
 import com.example.doctor_appointment_system_be.repository.TimeSlotRepository;
 import com.example.doctor_appointment_system_be.service.AppointmentService;
+import com.example.doctor_appointment_system_be.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientRepository patientRepository;
 
     private final AppointmentMapper appointmentMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -63,6 +67,15 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(patient.getUser().getId())
+                .userEmail(patient.getUser().getEmail())
+                .actorName(patient.getUser().getFullName())
+                .activityType(ActivityType.BOOKING)
+                .action("Booked appointment for " + appointment.getTimeSlot().getDate() + " at " + appointment.getTimeSlot().getStartTime())
+                .build());
+
         return appointmentMapper.toDTO(savedAppointment);
     }
 
@@ -81,21 +94,21 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
 
-        if (appointment.getStatus() == AppointmentStatus.CANCELLED){
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
             throw new APIException(HttpStatus.BAD_REQUEST, "This appointment is already cancelled.");
         }
 
-        if (appointment.getStatus() == AppointmentStatus.COMPLETED){
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
             throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel a completed appointment.");
         }
 
         TimeSlot timeSlot = appointment.getTimeSlot();
 
-        if (timeSlot != null){
+        if (timeSlot != null) {
 
             LocalDateTime appointmentDateTime = LocalDateTime.of(timeSlot.getDate(), timeSlot.getStartTime());
 
-            if (LocalDateTime.now().isAfter(appointmentDateTime.minusHours(24))){
+            if (LocalDateTime.now().isAfter(appointmentDateTime.minusHours(24))) {
                 throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel. Appointments must be cancelled at least 24 hours in advance.");
             }
 
@@ -104,9 +117,44 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setTimeSlot(null);
         }
 
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(appointment.getPatient().getUser().getId())
+                .userEmail(appointment.getPatient().getUser().getEmail())
+                .actorName(appointment.getPatient().getUser().getFullName())
+                .activityType(ActivityType.BOOKING)
+                .action("Cancelled appointment ID: " + appointment.getId())
+                .build());
+
         appointment.setStatus(AppointmentStatus.CANCELLED);
     }
 
+    @Override
+    @Transactional
+    public void completeAppointment(Appointment appointment) {
+        Appointment isExists = appointmentRepository.findById(appointment.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointment.getId()));
+
+        if (isExists.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new APIException(HttpStatus.BAD_REQUEST, "This appointment is already completed.");
+        }
+
+        if (isExists.getStatus() == AppointmentStatus.CANCELLED){
+            throw new APIException(HttpStatus.BAD_REQUEST, "This appointment is cancelled.");
+        }
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(isExists.getDoctor().getUser().getId())
+                .userEmail(isExists.getDoctor().getUser().getEmail())
+                .actorName(isExists.getDoctor().getUser().getFullName())
+                .activityType(ActivityType.BOOKING)
+                .action("Doctor completed consultation for patient " + isExists.getPatient().getUser().getFullName() + " (Appointment ID: " + isExists.getId() + ")")
+                .build());
+
+        isExists.setStatus(AppointmentStatus.COMPLETED);
+
+    }
 
     @Override
     @Transactional(readOnly = true)

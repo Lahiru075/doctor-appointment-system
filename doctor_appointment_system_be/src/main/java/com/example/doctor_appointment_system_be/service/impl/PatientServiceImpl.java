@@ -1,14 +1,13 @@
 package com.example.doctor_appointment_system_be.service.impl;
 
-import com.example.doctor_appointment_system_be.dto.PasswordChangeDTO;
-import com.example.doctor_appointment_system_be.dto.PatientRequestDTO;
-import com.example.doctor_appointment_system_be.dto.PatientResponseDTO;
-import com.example.doctor_appointment_system_be.dto.PatientUpdateDTO;
+import com.example.doctor_appointment_system_be.dto.*;
 import com.example.doctor_appointment_system_be.entity.Patient;
+import com.example.doctor_appointment_system_be.enums.ActivityType;
 import com.example.doctor_appointment_system_be.exception.InvalidPasswordException;
 import com.example.doctor_appointment_system_be.exception.ResourceNotFoundException;
 import com.example.doctor_appointment_system_be.mapper.PatientMapper;
 import com.example.doctor_appointment_system_be.repository.PatientRepository;
+import com.example.doctor_appointment_system_be.service.AuditLogService;
 import com.example.doctor_appointment_system_be.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +24,7 @@ public class PatientServiceImpl implements PatientService {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
     private final PatientMapper patientMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -66,6 +66,15 @@ public class PatientServiceImpl implements PatientService {
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + id));
 
         patient.getUser().setDeleted(true);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(patient.getUser().getId())
+                .userEmail(patient.getUser().getEmail())
+                .actorName("ADMIN")
+                .activityType(ActivityType.SECURITY)
+                .action("Soft deleted patient " + patient.getUser().getFullName())
+                .build());
     }
 
     @Override
@@ -75,7 +84,17 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + id));
 
-        patient.getUser().setActive(!patient.getUser().isActive());
+        boolean newStatus = !patient.getUser().isActive();
+        patient.getUser().setActive(newStatus);
+
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(patient.getUser().getId())
+                .userEmail(patient.getUser().getEmail())
+                .actorName("ADMIN")
+                .activityType(ActivityType.SECURITY)
+                .action("Toggled status to " + (newStatus ? "ACTIVE" : "INACTIVE") + " for patient " + patient.getUser().getFullName())
+                .build());
 
     }
 
