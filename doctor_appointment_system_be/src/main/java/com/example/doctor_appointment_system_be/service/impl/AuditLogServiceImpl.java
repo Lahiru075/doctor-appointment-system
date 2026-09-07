@@ -37,16 +37,4 @@ public class AuditLogServiceImpl implements AuditLogService {
     public List<AuditLogResponseDTO> getAllLogs() {
         return auditLogMapper.toDTOList(auditLogRepository.findAllByOrderByCreatedAtDesc());
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<AuditLogResponseDTO> getLogsByType(ActivityType type) {
-        return auditLogMapper.toDTOList(auditLogRepository.findByActivityTypeOrderByCreatedAtDesc(type));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<AuditLogResponseDTO> searchLogs(String query) {
-        return auditLogMapper.toDTOList(auditLogRepository.searchLogs(query));
-    }
 }

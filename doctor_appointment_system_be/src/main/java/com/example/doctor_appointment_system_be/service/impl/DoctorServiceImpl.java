@@ -162,6 +162,15 @@ public class DoctorServiceImpl implements DoctorService {
         existDoctor.setConsultationFee(doctorProfileUpdateDTO.getConsultationFee());
         existDoctor.setExperienceYears(doctorProfileUpdateDTO.getExperienceYears());
 
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(existDoctor.getUser().getId())
+                .userEmail(existDoctor.getUser().getEmail())
+                .actorName(existDoctor.getUser().getFullName())
+                .activityType(ActivityType.PROFILE)
+                .action("Updated doctor profile information (Bio, Fee, Experience)")
+                .build());
+
         return doctorMapper.toDTO(existDoctor);
     }
 

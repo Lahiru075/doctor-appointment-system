@@ -192,3 +192,15 @@ export interface PrescriptionResponseDTO {
     medications: string;
     createdAt: string;
 }
+
+// Audit Log
+
+export interface AuditLog {
+  id: number;
+  userId: number;
+  userEmail: string;
+  actorName: string;
+  activityType: 'SECURITY' | 'BOOKING' | 'PRESCRIPTION' | 'REVIEW' | 'PROFILE';
+  action: string;
+  createdAt: string;
+}

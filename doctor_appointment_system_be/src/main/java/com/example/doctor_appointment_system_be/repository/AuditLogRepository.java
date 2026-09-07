@@ -13,13 +13,4 @@ import java.util.List;
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
     List<AuditLog> findAllByOrderByCreatedAtDesc();
-
-    List<AuditLog> findByActivityTypeOrderByCreatedAtDesc(ActivityType activityType);
-
-    @Query("SELECT a FROM AuditLog a WHERE " +
-            "LOWER(a.action) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(a.userEmail) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(a.actorName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "ORDER BY a.createdAt DESC")
-    List<AuditLog> searchLogs(@Param("query") String query);
 }

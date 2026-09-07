@@ -8,8 +8,5 @@ import java.util.List;
 
 public interface AuditLogService {
     void logActivity(AuditLogRequestDTO requestDTO);
-
     List<AuditLogResponseDTO> getAllLogs();
-    List<AuditLogResponseDTO> getLogsByType(ActivityType type);
-    List<AuditLogResponseDTO> searchLogs(String query);
 }

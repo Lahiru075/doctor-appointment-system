@@ -126,6 +126,15 @@ public class PatientServiceImpl implements PatientService {
         patient.setBloodGroup(dto.getBloodGroup());
         patient.setMedicalHistory(dto.getMedicalHistory());
 
+        // save audit log
+        auditLogService.logActivity(AuditLogRequestDTO.builder()
+                .userId(patient.getUser().getId())
+                .userEmail(patient.getUser().getEmail())
+                .actorName(patient.getUser().getFullName())
+                .activityType(ActivityType.PROFILE)
+                .action("Updated patient medical profile (Blood Group, Medical History)")
+                .build());
+
     }
 
     @Override
