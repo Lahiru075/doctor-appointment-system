@@ -27,6 +27,7 @@ const AdminDashboard = () => {
     setIsLoading(true);
     try {
       const result = await getAdminDashboardStats();
+      console.log(result);
       setData(result);
       setLastSync(new Date());
     } catch (error) { console.error(error); }

@@ -28,8 +28,7 @@ export const deletePatient = async (id: number): Promise<void> => {
 };
 
 export const changePatientPassword = async (userId: number, data: PasswordChangeDTO): Promise<void> => {
-    console.log(data);
-    console.log(userId);
+
     try {
         await api.put(`/patients/change-password/${userId}`, data);
     } catch (error: any) {
