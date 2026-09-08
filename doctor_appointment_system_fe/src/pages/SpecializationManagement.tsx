@@ -9,7 +9,7 @@ import {
     createSpecialization, 
     updateSpecialization, 
     deleteSpecialization 
-} from '../services/specializationService';
+} from '../services/specialization';
 import  type { SpecializationResponseDTO, SpecializationDTO } from '../types/types';
 
 const SpecializationManagement = () => {
