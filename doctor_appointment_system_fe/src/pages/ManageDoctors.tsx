@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, UserPlus, ShieldAlert, Loader2, Ban, CheckCircle, Trash2, AlertCircle, Sparkles, X, Plus, Edit2, DollarSign, Award, Clipboard } from 'lucide-react';
 import { getAllDoctors, registerDoctor, updateDoctorByAdmin, toggleDoctorStatus, deleteDoctor } from '../services/doctor'; // doctor services [1]
-import { getSpecializations } from '../services/specialization'; // specializations dropdown [1]
+import { getAllSpecializations } from '../services/specialization'; // specializations dropdown [1]
 import type { DoctorResponseDTO, Specialization, DoctorRegisterDTO, DoctorUpdateDTO } from '../types/types';
 
 const ManageDoctors = () => {
@@ -55,7 +55,7 @@ const ManageDoctors = () => {
         loadDoctors();
         const loadSpecs = async () => {
             try {
-                const data = await getSpecializations();
+                const data = await getAllSpecializations();
                 setSpecializations(data);
             } catch (err) { console.error(err); }
         };

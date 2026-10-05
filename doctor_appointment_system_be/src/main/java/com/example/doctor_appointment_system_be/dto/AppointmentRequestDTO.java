@@ -1,15 +1,13 @@
 package com.example.doctor_appointment_system_be.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class AppointmentRequestDTO {
     @NotNull(message = "User ID is required")
     private Long userId;
