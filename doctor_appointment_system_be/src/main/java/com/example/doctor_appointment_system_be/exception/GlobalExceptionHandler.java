@@ -1,6 +1,7 @@
 package com.example.doctor_appointment_system_be.exception;
 
 import com.example.doctor_appointment_system_be.dto.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
@@ -15,11 +16,15 @@ import java.util.Map;
 
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // meka multi purpose tool ekak wge.. oni thenkt use krnn puluwn..
     @ExceptionHandler(APIException.class)
     public ResponseEntity<ApiResponse<Object>> handleApiException(APIException e){
+
+        log.warn("APIException: {} | Status: {}", e.getMessage(), e.getStatus());
+
         ApiResponse<Object> response = ApiResponse.builder()
                 .success(false)
                 .status(e.getStatus().value())
@@ -32,6 +37,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourcesNotFoundException(ResourceNotFoundException e){
+
+        log.warn("ResourceNotFoundException: {}", e.getMessage());
+
         ApiResponse<Object> response = ApiResponse.builder()
                 .success(false)
                 .status(HttpStatus.NOT_FOUND.value())
@@ -53,6 +61,8 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+        log.warn("Validation failed for fields: {}", errors);
+
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .success(false)
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -66,6 +76,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ApiResponse<Void>> handleDisabledException(DisabledException ex) {
+
+        log.warn("Disabled account access attempt: {}", ex.getMessage());
+
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .success(false)
                 .status(HttpStatus.UNAUTHORIZED.value())
@@ -78,6 +91,9 @@ public class GlobalExceptionHandler {
     // anapekshitha welawat eka onima error ekak handle kirimata
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception e){
+
+        log.error("Unhandled Internal Server Error occurred: ", e);
+
         ApiResponse<Object> response = ApiResponse.builder()
                 .success(false)
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -90,6 +106,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidPasswordException(InvalidPasswordException e){
+
+        log.warn("InvalidPasswordException: {}", e.getMessage());
+
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .success(false)
                 .status(HttpStatus.BAD_REQUEST.value())

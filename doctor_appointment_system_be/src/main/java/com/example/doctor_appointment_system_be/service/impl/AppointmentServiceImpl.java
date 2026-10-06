@@ -20,6 +20,7 @@ import com.example.doctor_appointment_system_be.repository.TimeSlotRepository;
 import com.example.doctor_appointment_system_be.service.AppointmentService;
 import com.example.doctor_appointment_system_be.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
@@ -43,10 +45,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public AppointmentResponseDTO bookAppointment(AppointmentRequestDTO dto) {
 
+        log.info("Processing booking request: User #{} for Doctor #{} on TimeSlot #{}",
+                dto.getUserId(), dto.getDoctorId(), dto.getTimeSlotId());
+
         TimeSlot timeSlot = timeSlotRepository.findById(dto.getTimeSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Time Slot not found with ID: " + dto.getTimeSlotId()));
 
         if (timeSlot.isBooked()) {
+            log.warn("Booking conflict: TimeSlot #{} is already booked", dto.getTimeSlotId());
             throw new APIException(HttpStatus.CONFLICT, "This time slot is already booked by another patient!");
         }
 
@@ -76,13 +82,16 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .action("Booked appointment for " + appointment.getTimeSlot().getDate() + " at " + appointment.getTimeSlot().getStartTime())
                 .build());
 
+        log.info("Appointment #{} booked successfully for Patient: {}",
+                savedAppointment.getId(), patient.getUser().getEmail());
+
         return appointmentMapper.toDTO(savedAppointment);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getMyAppointments(Long userId) {
-
+        log.debug("Fetching patient appointments for User ID: {}", userId);
         return appointmentMapper.toDTOList(appointmentRepository.findAppointmentsByUserId(userId));
 
     }
@@ -91,14 +100,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public void cancelAppointment(Long id) {
 
+        log.info("Processing cancellation for Appointment ID: #{}", id);
+
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + id));
 
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            log.warn("Cancel rejected: Appointment #{} is already cancelled", id);
             throw new APIException(HttpStatus.BAD_REQUEST, "This appointment is already cancelled.");
         }
 
         if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            log.warn("Cancel rejected: Cannot cancel completed Appointment #{}", id);
             throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel a completed appointment.");
         }
 
@@ -109,6 +122,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             LocalDateTime appointmentDateTime = LocalDateTime.of(timeSlot.getDate(), timeSlot.getStartTime());
 
             if (LocalDateTime.now().isAfter(appointmentDateTime.minusHours(24))) {
+                log.warn("Cancel rejected: 24-hour advance cancellation rule violated for Appointment #{}", id);
                 throw new APIException(HttpStatus.BAD_REQUEST, "Cannot cancel. Appointments must be cancelled at least 24 hours in advance.");
             }
 
@@ -127,11 +141,15 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build());
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
+        log.info("Appointment #{} successfully cancelled and slot released", id);
     }
 
     @Override
     @Transactional
     public void completeAppointment(Appointment appointment) {
+
+        log.info("Processing consultation completion for Appointment ID: #{}", appointment.getId());
+
         Appointment isExists = appointmentRepository.findById(appointment.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointment.getId()));
 
@@ -154,11 +172,15 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         isExists.setStatus(AppointmentStatus.COMPLETED);
 
+        log.info("Appointment #{} marked as COMPLETED by Dr. {}",
+                isExists.getId(), isExists.getDoctor().getUser().getFullName());
+
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getDoctorAppointments(Long userId) {
+        log.debug("Fetching active appointments for Doctor User ID: {}", userId);
         List<Appointment> appointments = appointmentRepository.findAppointmentsByDoctorUserId(userId);
         return appointmentMapper.toDTOList(appointments);
     }
@@ -166,6 +188,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getDoctorAppointmentsHistory(Long userId) {
+        log.debug("Fetching appointment history for Doctor User ID: {}", userId);
         List<Appointment> appointments = appointmentRepository.findAllDoctorAppointmentsHistory(userId);
         return appointmentMapper.toDTOList(appointments);
     }

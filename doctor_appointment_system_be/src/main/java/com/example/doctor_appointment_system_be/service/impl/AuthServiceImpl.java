@@ -15,6 +15,7 @@ import com.example.doctor_appointment_system_be.service.AuditLogService;
 import com.example.doctor_appointment_system_be.service.AuthService;
 import com.example.doctor_appointment_system_be.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -38,6 +40,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterResponse register(RegisterDTO registerDTO) {
+
+        log.info("Processing registration for email: {}", registerDTO.getEmail());
 
         if (userRepository.existsByEmail(registerDTO.getEmail())) {
             throw new APIException(HttpStatus.CONFLICT, "Email is already in use");
@@ -71,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
                 .action("New user registered successfully with role: " + user.getRole().name())
                 .build());
 
+        log.info("User registered successfully with ID: {} and Role: {}", savedUser.getId(), savedUser.getRole());
+
         return RegisterResponse.builder()
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
@@ -80,6 +86,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginDTO loginDTO) {
 
+        log.info("Attempting authentication for email: {}", loginDTO.getEmail());
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -88,9 +96,10 @@ public class AuthServiceImpl implements AuthService {
                     )
             );
         } catch (DisabledException e) {
+            log.warn("Login blocked. Inactive account for email: {}", loginDTO.getEmail());
             throw new APIException(HttpStatus.UNAUTHORIZED, "Your account is currently inactive. Please contact support.");
-
         } catch (Exception e) {
+            log.warn("Authentication failed for email: {} - Reason: {}", loginDTO.getEmail(), e.getMessage());
             throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
 
@@ -108,6 +117,8 @@ public class AuthServiceImpl implements AuthService {
                 .action("User logged in successfully as " + user.getRole().name())
                 .build());
 
+        log.info("User authenticated successfully: {} (Role: {})", user.getEmail(), user.getRole());
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -118,11 +129,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String refreshToken(String refreshToken) {
+
+        log.info("Processing access token refresh request");
+
         try {
 
             String email = jwtUtil.extractRefreshUsername(refreshToken);
 
             if (email == null) {
+                log.warn("Refresh token validation failed: extracted username is null");
                 throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid or Expire refresh token");
             }
 
@@ -136,14 +151,17 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
             if (!jwtUtil.isRefreshTokenValid(refreshToken, userDetails)) {
+                log.warn("Refresh token is invalid or expired for user: {}", email);
                 throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid or Expire refresh token");
             }
 
             String newAccessToken = jwtUtil.generateAccessToken(user);
+            log.info("New access token generated successfully for user: {}", email);
 
             return newAccessToken;
 
         } catch (Exception e) {
+            log.error("Error occurred while verifying refresh token: {}", e.getMessage());
             throw new APIException(org.springframework.http.HttpStatus.UNAUTHORIZED, "An issue occurred while verifying the refresh token: " + e.getMessage());
         }
 
