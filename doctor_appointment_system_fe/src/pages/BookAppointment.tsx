@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Calendar, Star, Loader2, Sparkles, Filter, CheckCircle2, ChevronRight, X, Clock, AlertCircle, MessageSquare } from 'lucide-react';
+import { Search, MapPin, Calendar, Star, Loader2, Sparkles, Filter, CheckCircle2, ChevronRight, X, Clock, AlertCircle, MessageSquare, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { getDoctorSuggestions, searchDoctors } from "../services/doctor";
-import { getSpecializations } from "../services/specialization";
+import { getAllSpecializations } from "../services/specialization";
 import { getDoctorAvailableSlots } from "../services/timeSlot";
 import { bookAppointment } from "../services/appointment";
 import { getDoctorReviews } from "../services/review";
@@ -13,6 +13,13 @@ import { useAuth } from '../context/authContext';
 const BookAppointment = () => {
 
     const { user } = useAuth();
+
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 4000);
+    };
 
     // Search and Filters States
     const [searchQuery, setSearchQuery] = useState('');
@@ -43,7 +50,7 @@ const BookAppointment = () => {
     useEffect(() => {
         const fetchSpecializations = async () => {
             try {
-                const data = await getSpecializations();
+                const data = await getAllSpecializations();
                 setSpecializations(data);
             } catch (err) {
                 console.error("Failed to load specializations", err);
@@ -195,10 +202,10 @@ const BookAppointment = () => {
             setBookingSuccess(result);
             setSelectedDoctor(null);
 
-            alert("Success: Appointment Booked!");
+            showToast(`Your appointment with Dr. ${user.name} was confirmed!`);
 
         } catch (err: any) {
-            alert("Booking Failed: " + err.message);
+            showToast(err.response?.data?.message || err.message || "Failed to book appointment.");
         } finally {
             setIsSaving(false);
         }
@@ -208,6 +215,27 @@ const BookAppointment = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-300">
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="fixed top-24 right-6 md:right-12 z-50 max-w-md bg-[#082e3e] text-white border border-emerald-900/40 rounded-[1.5rem] p-4.5 shadow-2xl flex items-center gap-3.5"
+                    >
+                        <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
+                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                            <h4 className="font-extrabold text-xs tracking-tight text-white mb-0.5">Appointment Confirmed</h4>
+                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">{toast}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header Banner */}
             <div className="bg-gradient-to-br from-[#8eb5ca] via-[#709eb7] to-[#082e3e] rounded-[2.5rem] border border-white p-8 md:p-10 relative overflow-hidden text-white shadow-lg">
                 <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />

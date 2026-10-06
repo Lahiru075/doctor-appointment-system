@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Plus, Trash2, Save, Loader2, Settings, Calendar } from 'lucide-react';
+import { Clock, Plus, Trash2, Save, Loader2, Settings, Calendar, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import { saveAvailability, getAvailability } from "../services/timeSlot";
 import type { WeeklyScheduleDTO, DayOfWeek } from "../types/types";
+import { motion, AnimatePresence } from 'motion/react';
 
 const DAYS: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
 const DoctorAvailability = () => {
     const { user } = useAuth();
+
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 4000);
+    };
+
     const [isSaving, setIsSaving] = useState(false);
     const [schedule, setSchedule] = useState<WeeklyScheduleDTO>({
         defaultSlotDuration: 30,
@@ -19,13 +28,14 @@ const DoctorAvailability = () => {
     );
 
     // 1. Load data from Backend
+    const loadData = async () => {
+        try {
+            const data = await getAvailability(user.id);
+            if (data) setSchedule(data);
+        } catch (err) { console.error("Load failed"); }
+    };
+
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                const data = await getAvailability(user.id);
-                if (data) setSchedule(data);
-            } catch (err) { console.error("Load failed"); }
-        };
         loadData();
     }, [user.id]);
 
@@ -107,9 +117,10 @@ const DoctorAvailability = () => {
             }
 
             await saveAvailability(user.id, schedule);
-            alert("Success: Weekly Schedule Updated!");
+            loadData(); // Refresh data after saving
+            showToast("Your weekly availability schedule has been updated successfully!");
         } catch (err) {
-            alert("Error: Could not save schedule.");
+            showToast("Could not save schedule. Please check your slot timings.");
         } finally {
             setIsSaving(false);
         }
@@ -118,6 +129,25 @@ const DoctorAvailability = () => {
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
 
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="fixed top-24 right-6 md:right-12 z-50 max-w-md bg-[#082e3e] text-white border border-emerald-900/40 rounded-[1.5rem] p-4.5 shadow-2xl flex items-center gap-3.5"
+                    >
+                        <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
+                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                            <h4 className="font-extrabold text-xs tracking-tight text-white mb-0.5">Schedule Notice</h4>
+                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">{toast}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
 
             {/* Top Control Panel */}
@@ -134,12 +164,12 @@ const DoctorAvailability = () => {
                             {[15, 30, 45, 60].map(m => (
                                 <button
                                     key={m}
-                                    disabled={hasDbData} 
+                                    disabled={hasDbData}
                                     onClick={() => setSchedule({ ...schedule, defaultSlotDuration: m })}
                                     className={`px-4 py-1.5 rounded-xl text-[11px] font-black transition-all ${schedule.defaultSlotDuration === m
-                                            ? 'bg-[#082e3e] text-white shadow-md'
-                                            : 'text-slate-400 hover:bg-white'
-                                        } ${hasDbData ? 'opacity-40 cursor-not-allowed' : ''}`} 
+                                        ? 'bg-[#082e3e] text-white shadow-md'
+                                        : 'text-slate-400 hover:bg-white'
+                                        } ${hasDbData ? 'opacity-40 cursor-not-allowed' : ''}`}
                                 >
                                     {m}m
                                 </button>

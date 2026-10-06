@@ -1,0 +1,152 @@
+2026-10-06T13:03:00.562+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Starting DoctorAppointmentSystemBeApplication using Java 17.0.10 with PID 14012 (C:\Users\Lahiru Lakshan\Documents\My Projects\Doctor Appointment System\doctor_appointment_system_be\target\classes started by Lahiru Lakshan in C:\Users\Lahiru Lakshan\Documents\My Projects\Doctor Appointment System\doctor_appointment_system_be)
+2026-10-06T13:03:00.569+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Running with Spring Boot v3.5.14, Spring v6.2.18
+2026-10-06T13:03:00.572+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : No active profile set, falling back to 1 default profile: "default"
+2026-10-06T13:03:00.735+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-06T13:03:00.736+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-06T13:03:02.812+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-06T13:03:02.969+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 135 ms. Found 9 JPA repository interfaces.
+2026-10-06T13:03:04.247+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-10-06T13:03:04.270+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-06T13:03:04.271+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-10-06T13:03:04.369+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-10-06T13:03:04.370+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3633 ms
+2026-10-06T13:03:04.651+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-06T13:03:04.773+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-10-06T13:03:04.840+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-10-06T13:03:05.385+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-06T13:03:05.470+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-06T13:03:05.806+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@48787d85
+2026-10-06T13:03:05.807+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-06T13:03:05.880+05:30  WARN 14012 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-06T13:03:05.912+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.9
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-06T13:03:07.473+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-06T13:03:07.750+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-06T13:03:08.264+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-06T13:03:09.188+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [restartedMain] c.e.d.util.JwtAuthFilter                 : Filter 'jwtAuthFilter' configured for use
+2026-10-06T13:03:10.193+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-10-06T13:03:10.194+05:30  WARN 14012 --- [doctor_appointment_system_be] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-10-06T13:03:12.101+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-10-06T13:03:12.201+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-10-06T13:03:12.237+05:30  INFO 14012 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Started DoctorAppointmentSystemBeApplication in 12.992 seconds (process running for 14.444)
+2026-10-06T13:05:21.787+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-06T13:05:21.788+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-06T13:05:21.794+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 5 ms
+2026-10-06T13:05:23.066+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: kamal@cliniq.com
+2026-10-06T13:05:26.840+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: kamal@cliniq.com (Role: DOCTOR)
+2026-10-06T13:05:28.139+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:05:38.716+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:05:42.594+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:16:35.752+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-9] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:16:40.389+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:18:04.593+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: nimali@cliniq.com
+2026-10-06T13:18:04.718+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.service.impl.AuthServiceImpl       : Login blocked. Inactive account for email: nimali@cliniq.com
+2026-10-06T13:18:04.729+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.exception.GlobalExceptionHandler   : APIException: Your account is currently inactive. Please contact support. | Status: 401 UNAUTHORIZED
+2026-10-06T13:18:04.734+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [com.example.doctor_appointment_system_be.exception.APIException: Your account is currently inactive. Please contact support.]
+2026-10-06T13:18:21.015+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: nimali@cliniq.com
+2026-10-06T13:18:21.120+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.service.impl.AuthServiceImpl       : Login blocked. Inactive account for email: nimali@cliniq.com
+2026-10-06T13:18:21.128+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.exception.GlobalExceptionHandler   : APIException: Your account is currently inactive. Please contact support. | Status: 401 UNAUTHORIZED
+2026-10-06T13:18:21.130+05:30  WARN 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [com.example.doctor_appointment_system_be.exception.APIException: Your account is currently inactive. Please contact support.]
+2026-10-06T13:19:32.404+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: ruwan@cliniq.com
+2026-10-06T13:19:32.505+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: ruwan@cliniq.com (Role: DOCTOR)
+2026-10-06T13:19:32.610+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 7
+2026-10-06T13:19:35.422+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 7
+2026-10-06T13:22:56.747+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: alex@gmail.com
+2026-10-06T13:22:56.865+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: alex@gmail.com (Role: PATIENT)
+2026-10-06T13:22:56.952+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-3] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:23:10.307+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:23:17.371+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:23:20.911+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:25:29.386+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:26:03.211+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:26:56.622+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Processing booking request: User #4 for Doctor #1 on TimeSlot #237
+2026-10-06T13:26:56.678+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Appointment #13 booked successfully for Patient: alex@gmail.com
+2026-10-06T13:27:03.016+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:28:16.633+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-9] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:28:41.265+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: kamal@cliniq.com
+2026-10-06T13:28:41.375+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: kamal@cliniq.com (Role: DOCTOR)
+2026-10-06T13:28:41.444+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:28:46.044+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:29:05.728+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:31:40.058+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.s.impl.AppointmentServiceImpl      : Processing consultation completion for Appointment ID: #13
+2026-10-06T13:31:40.077+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.s.impl.AppointmentServiceImpl      : Appointment #13 marked as COMPLETED by Dr. Dr. Kamal Perera
+2026-10-06T13:31:41.741+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:31:44.240+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:32:10.299+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: alex@gmail.com
+2026-10-06T13:32:10.422+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: alex@gmail.com (Role: PATIENT)
+2026-10-06T13:32:10.484+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:32:13.916+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-9] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:33:00.976+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:33:05.983+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 4
+2026-10-06T13:33:30.175+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: kamal@cliniq.com
+2026-10-06T13:33:30.278+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: kamal@cliniq.com (Role: DOCTOR)
+2026-10-06T13:33:30.336+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-5] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T13:33:34.684+05:30 DEBUG 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-8] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T13:34:55.399+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: admin@gmail.com
+2026-10-06T13:34:55.512+05:30  INFO 14012 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: admin@gmail.com (Role: ADMIN)
+2026-10-06T13:38:36.235+05:30  INFO 14012 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-06T13:38:36.320+05:30  INFO 14012 --- [doctor_appointment_system_be] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-10-06T13:38:36.328+05:30  INFO 14012 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-10-06T13:38:36.342+05:30  INFO 14012 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-10-06T13:38:36.346+05:30  INFO 14012 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-10-06T19:43:24.104+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Starting DoctorAppointmentSystemBeApplication using Java 17.0.10 with PID 18168 (C:\Users\Lahiru Lakshan\Documents\My Projects\Doctor Appointment System\doctor_appointment_system_be\target\classes started by Lahiru Lakshan in C:\Users\Lahiru Lakshan\Documents\My Projects\Doctor Appointment System\doctor_appointment_system_be)
+2026-10-06T19:43:24.108+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Running with Spring Boot v3.5.14, Spring v6.2.18
+2026-10-06T19:43:24.110+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : No active profile set, falling back to 1 default profile: "default"
+2026-10-06T19:43:24.243+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-10-06T19:43:24.243+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-10-06T19:43:25.843+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-06T19:43:25.981+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 123 ms. Found 9 JPA repository interfaces.
+2026-10-06T19:43:26.990+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-10-06T19:43:27.015+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-06T19:43:27.015+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-10-06T19:43:27.099+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-10-06T19:43:27.100+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2855 ms
+2026-10-06T19:43:27.370+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-06T19:43:27.493+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-10-06T19:43:27.569+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-10-06T19:43:28.117+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-06T19:43:28.174+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-06T19:43:28.565+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@55f613f8
+2026-10-06T19:43:28.567+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-06T19:43:28.640+05:30  WARN 18168 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-06T19:43:28.667+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.9
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-06T19:43:30.167+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-06T19:43:30.396+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-06T19:43:30.902+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-06T19:43:31.831+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [restartedMain] c.e.d.util.JwtAuthFilter                 : Filter 'jwtAuthFilter' configured for use
+2026-10-06T19:43:32.920+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-10-06T19:43:32.921+05:30  WARN 18168 --- [doctor_appointment_system_be] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-10-06T19:43:34.689+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-10-06T19:43:34.745+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-10-06T19:43:34.772+05:30  INFO 18168 --- [doctor_appointment_system_be] [restartedMain] e.d.DoctorAppointmentSystemBeApplication : Started DoctorAppointmentSystemBeApplication in 11.559 seconds (process running for 12.544)
+2026-10-06T19:45:52.437+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-06T19:45:52.437+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-06T19:45:52.443+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2026-10-06T19:45:52.943+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: kamal@cliniq.com
+2026-10-06T19:45:54.192+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-2] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: kamal@cliniq.com (Role: DOCTOR)
+2026-10-06T19:45:54.588+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-5] c.e.d.s.impl.AppointmentServiceImpl      : Fetching active appointments for Doctor User ID: 5
+2026-10-06T19:45:59.999+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.s.impl.AppointmentServiceImpl      : Fetching appointment history for Doctor User ID: 5
+2026-10-06T19:46:56.529+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : Attempting authentication for email: john@gmail.com
+2026-10-06T19:46:56.644+05:30  INFO 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-4] c.e.d.service.impl.AuthServiceImpl       : User authenticated successfully: john@gmail.com (Role: PATIENT)
+2026-10-06T19:46:56.740+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 2
+2026-10-06T19:47:01.628+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-10] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 2
+2026-10-06T19:59:51.172+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-6] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 2
+2026-10-06T20:00:00.424+05:30 DEBUG 18168 --- [doctor_appointment_system_be] [http-nio-8080-exec-7] c.e.d.s.impl.AppointmentServiceImpl      : Fetching patient appointments for User ID: 2
+2026-10-06T20:49:17.812+05:30  INFO 18168 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2026-10-06T20:49:17.908+05:30  INFO 18168 --- [doctor_appointment_system_be] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2026-10-06T20:49:17.927+05:30  INFO 18168 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-10-06T20:49:17.960+05:30  INFO 18168 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-10-06T20:49:17.972+05:30  INFO 18168 --- [doctor_appointment_system_be] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

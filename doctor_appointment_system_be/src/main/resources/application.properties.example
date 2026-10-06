@@ -1,21 +1,54 @@
+# ===================================================================
+# CliniQ Backend Configuration Template
+# Copy this file to 'application.properties' and fill in your values
+# ===================================================================
+
 spring.application.name=doctor_appointment_system_be
-
-# Database Connection (PostgreSQL)
-spring.datasource.url=jdbc:postgresql://localhost:5432/doctor_appointment_db
-spring.datasource.username=postgres
-spring.datasource.password=
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# JPA / Hibernate Settings
-# auto-generate tables
-spring.jpa.hibernate.ddl-auto=update
-# show database queries on to the terminal
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-
-# Server Port
 server.port=8080
 
-# JSON format settings
+# -------------------------------------------------------------------
+# Database Connection (PostgreSQL)
+# -------------------------------------------------------------------
+spring.datasource.url=jdbc:postgresql://localhost:5432/doctor_appointment_db
+spring.datasource.username=postgres
+spring.datasource.password=your_postgres_password_here
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# -------------------------------------------------------------------
+# JPA / Hibernate Settings
+# -------------------------------------------------------------------
+# Use 'update' for dev, 'validate' or migration tools (Flyway) for prod
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.open-in-view=false
+
+# -------------------------------------------------------------------
+# Jackson JSON Serialization
+# -------------------------------------------------------------------
 spring.jackson.serialization.indent_output=true
+
+# -------------------------------------------------------------------
+# JWT Security Configuration (HMAC-SHA256 Secret Keys)
+# -------------------------------------------------------------------
+# Access Token Expiration: 15 minutes (900000 ms)
+jwt.expiration=900000
+jwt.secretKey=your_base64_encoded_256_bit_secret_key_here
+
+# Refresh Token Expiration: 7 days (604800000 ms)
+jwt.refreshExpiration=604800000
+jwt.refreshSecretKey=your_base64_encoded_256_bit_refresh_secret_key_here
+
+# -------------------------------------------------------------------
+# Application Logging Configuration (SLF4J / Logback)
+# -------------------------------------------------------------------
+logging.level.root=INFO
+logging.level.com.example.doctor_appointment_system_be=DEBUG
+
+# File Logging Policy
+logging.file.name=logs/cliniq.log
+logging.logback.rollingpolicy.max-file-size=10MB
+logging.logback.rollingpolicy.max-history=30
+
+# Console Pattern with Colors
+logging.pattern.console=%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(${PID:- }){magenta} --- %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %m%n

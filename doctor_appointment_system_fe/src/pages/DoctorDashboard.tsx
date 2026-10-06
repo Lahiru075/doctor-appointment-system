@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { Users, Activity, Clock, Loader2, Sparkles, CheckCircle2, User, X, FileText, Clipboard, AlertCircle, Calendar } from 'lucide-react';
+import { Users, Activity, Clock, Loader2, Sparkles, CheckCircle2, User, X, FileText, Clipboard, AlertCircle, Calendar, CheckCircle } from 'lucide-react';
 import { getDoctorAppointments } from '../services/appointment';
-import { createPrescription } from '../services/prescription'; 
+import { createPrescription } from '../services/prescription';
 import type { AppointmentResponseDTO } from '../types/types';
 
 const DoctorDashboard = () => {
     const { user } = useAuth();
+
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 4000);
+    };
+
     const [appointments, setAppointments] = useState<AppointmentResponseDTO[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeAppointmentId, setActiveAppointmentId] = useState<number | null>(null);
@@ -57,12 +65,12 @@ const DoctorDashboard = () => {
                 medications
             });
 
-            alert("Success: Prescription issued and consultation completed!");
+            showToast("Prescription issued and consultation completed successfully!");
             setPrescriptionApptId(null);
             setDiagnosis('');
             setMedications('');
             setActiveAppointmentId(null);
-            loadAppointments(); 
+            loadAppointments();
         } catch (err: any) {
             setFormError(err.response?.data?.message || "Failed to submit prescription.");
         } finally {
@@ -74,6 +82,27 @@ const DoctorDashboard = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-200">
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="fixed top-24 right-6 md:right-12 z-50 max-w-md bg-[#082e3e] text-white border border-emerald-900/40 rounded-[1.5rem] p-4.5 shadow-2xl flex items-center gap-3.5"
+                    >
+                        <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
+                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                            <h4 className="font-extrabold text-xs tracking-tight text-white mb-0.5">Consultation Completed</h4>
+                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">{toast}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Welcome Banner */}
             <div className="bg-gradient-to-br from-[#8eb5ca] via-[#709eb7] to-[#082e3e] rounded-[2.5rem] border border-white p-8 relative overflow-hidden text-white shadow-lg">
                 <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
@@ -97,7 +126,7 @@ const DoctorDashboard = () => {
                         <h3 className="text-[13px] font-black text-[#082e3e] uppercase tracking-wider mb-6 flex items-center gap-2">
                             <Users className="w-5 h-5 text-[#0a4053]" /> Waiting Patients Queue ({remainingPatients})
                         </h3>
-                        
+
                         {isLoading ? (
                             <div className="h-48 flex items-center justify-center">
                                 <Loader2 className="w-8 h-8 text-[#082e3e] animate-spin" />
@@ -119,9 +148,8 @@ const DoctorDashboard = () => {
                                                     </span>
                                                     <h4 className="font-extrabold text-[#082e3e] text-base">{app.patientName || "Patient"}</h4>
                                                 </div>
-                                                <span className={`self-start sm:self-auto text-xs px-3 py-1 rounded-full font-bold ${
-                                                    isInProgress ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-[#e3edf2] text-[#082e3e]'
-                                                }`}>
+                                                <span className={`self-start sm:self-auto text-xs px-3 py-1 rounded-full font-bold ${isInProgress ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-[#e3edf2] text-[#082e3e]'
+                                                    }`}>
                                                     {isInProgress ? 'In-Progress' : 'Waiting'}
                                                 </span>
                                             </div>
@@ -151,9 +179,9 @@ const DoctorDashboard = () => {
                                                         Begin Consultation
                                                     </button>
                                                 ) : (
-                    
+
                                                     <button
-                                                        onClick={() => setPrescriptionApptId(app.id)} 
+                                                        onClick={() => setPrescriptionApptId(app.id)}
                                                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5"
                                                     >
                                                         <CheckCircle2 className="w-4 h-4" />
@@ -206,7 +234,7 @@ const DoctorDashboard = () => {
                                     <h3 className="text-lg font-black text-[#082e3e]">Issue Prescription</h3>
                                     <p className="text-[11px] text-slate-400 font-bold uppercase mt-0.5">Appt ID: #{prescriptionApptId}</p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => {
                                         setPrescriptionApptId(null);
                                         setDiagnosis('');

@@ -4,6 +4,7 @@ import { FileText, Download, Loader2, AlertCircle, Sparkles, User, Calendar, Pil
 import { useAuth } from '../context/authContext';
 import { getPatientPrescriptions } from '../services/prescription';
 import type { PrescriptionResponseDTO } from '../types/types';
+import jsPDF from 'jspdf';
 
 const Prescriptions = () => {
     const { user } = useAuth();
@@ -26,8 +27,85 @@ const Prescriptions = () => {
     }, [user.id]);
 
 
-    const handleDownload = (id: number) => {
-        alert(`Downloading prescription #${id} as PDF...`);
+    // Clean & Branded PDF Generation
+    const handleDownload = (rx: PrescriptionResponseDTO) => {
+        const doc = new jsPDF();
+
+        // 1. Header Banner
+        doc.setFillColor(8, 46, 62); // CliniQ Dark Teal
+        doc.rect(0, 0, 210, 35, 'F');
+
+        doc.setTextColor(16, 185, 129); // Emerald
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CliniQ', 15, 20);
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('OFFICIAL MEDICAL PRESCRIPTION', 15, 27);
+
+        // RX ID & Date
+        doc.setTextColor(180, 205, 218);
+        doc.setFontSize(9);
+        doc.text(`RX ID: #${rx.id}`, 155, 18);
+        doc.text(`Date: ${rx.createdAt || new Date().toLocaleDateString()}`, 155, 25);
+
+        // 2. Doctor Information Box
+        doc.setFillColor(241, 245, 249);
+        doc.roundedRect(15, 45, 180, 24, 3, 3, 'F');
+
+        doc.setTextColor(8, 46, 62);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Physician: ${rx.doctorName}`, 22, 55);
+
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Specialization: ${rx.specializationName}`, 22, 62);
+
+        // 3. Clinical Diagnosis
+        doc.setTextColor(225, 29, 72); // Rose
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CLINICAL DIAGNOSIS', 15, 82);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(rx.diagnosis || 'N/A', 15, 90);
+
+        // Divider Line
+        doc.setDrawColor(226, 232, 240);
+        doc.line(15, 98, 195, 98);
+
+        // 4. Prescribed Medications
+        doc.setTextColor(16, 185, 129); // Emerald
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PRESCRIBED MEDICATIONS & INSTRUCTIONS', 15, 108);
+
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(9.5);
+        doc.setFont('helvetica', 'normal');
+
+        const splitMedications = doc.splitTextToSize(rx.medications || 'No medications listed.', 180);
+        doc.text(splitMedications, 15, 117);
+
+        // 5. Footer Signature Line
+        doc.setDrawColor(203, 213, 225);
+        doc.line(140, 250, 195, 250);
+        doc.setFontSize(8.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Doctor Signature / Stamp', 145, 256);
+
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('Generated via CliniQ Healthcare Platform • Verified Electronic Health Record', 15, 285);
+
+        // Save file
+        doc.save(`CliniQ_Prescription_RX_${rx.id}.pdf`);
     };
 
     return (
@@ -115,7 +193,7 @@ const Prescriptions = () => {
                                 {/* Footer Action */}
                                 <div className="mt-6 pt-5 border-t border-slate-100 flex justify-end">
                                     <button 
-                                        onClick={() => handleDownload(rx.id)}
+                                        onClick={() => handleDownload(rx)}
                                         className="flex items-center gap-2 bg-[#082e3e] hover:bg-[#0a4053] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer"
                                     >
                                         <Download className="w-4 h-4" />

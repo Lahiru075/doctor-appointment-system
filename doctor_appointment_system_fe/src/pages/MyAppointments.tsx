@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, XCircle, Ban, MessageSquare, Star, X } from 'lucide-react';
+import { Calendar, Clock, Loader2, AlertCircle, Sparkles, User, FileText, CheckCircle2, XCircle, Ban, MessageSquare, Star, X, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 import { getPatientAppointments, cancelAppointment } from '../services/appointment';
 import { addReview } from '../services/review';
@@ -8,6 +8,14 @@ import type { AppointmentResponseDTO } from '../types/types';
 
 const MyAppointments = () => {
     const { user } = useAuth();
+
+    const [toast, setToast] = useState<string | null>(null);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 4000);
+    };
+
     const [appointments, setAppointments] = useState<AppointmentResponseDTO[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST'>('UPCOMING');
@@ -40,11 +48,11 @@ const MyAppointments = () => {
 
         try {
             await cancelAppointment(appointmentId);
-            alert("Appointment cancelled successfully!");
+            showToast("Appointment cancelled successfully!");
 
             fetchAppointments();
         } catch (err: any) {
-            alert("Failed to cancel: " + err.message);
+            showToast(err.response?.data?.message || err.message || "Failed to cancel appointment.");
         }
     };
 
@@ -61,7 +69,7 @@ const MyAppointments = () => {
                 rating,
                 comment
             });
-            alert("Review submitted successfully!");
+            showToast("Your review has been submitted successfully!");
             setSelectedApptForReview(null);
             setComment('');
             setRating(5);
@@ -100,6 +108,27 @@ const MyAppointments = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-300">
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="fixed top-24 right-6 md:right-12 z-50 max-w-md bg-[#082e3e] text-white border border-emerald-900/40 rounded-[1.5rem] p-4.5 shadow-2xl flex items-center gap-3.5"
+                    >
+                        <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
+                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0">
+                            <h4 className="font-extrabold text-xs tracking-tight text-white mb-0.5">Appointment Update</h4>
+                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">{toast}</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Top Banner */}
             <div className="bg-gradient-to-br from-[#8eb5ca] via-[#709eb7] to-[#082e3e] rounded-[2.5rem] border border-white p-8 md:p-10 relative overflow-hidden text-white shadow-lg">
                 <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
