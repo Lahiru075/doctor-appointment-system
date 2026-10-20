@@ -36,26 +36,6 @@ public class PatientController {
 
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<ApiResponse<PatientResponseDTO>> updatePatient(
-//            @PathVariable Long id,
-//            @RequestBody PatientRequestDTO patientRequestDTO
-//    ) {
-//
-//        PatientResponseDTO response = patientService.updatePatient(id, patientRequestDTO);
-//
-//        ApiResponse<PatientResponseDTO> apiResponse = ApiResponse.<PatientResponseDTO>builder()
-//                .success(true)
-//                .status(HttpStatus.OK.value())
-//                .message("Patient updated successfully!")
-//                .data(response)
-//                .timestamp(LocalDateTime.now())
-//                .build();
-//
-//        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-//
-//    }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deletePatient(@PathVariable Long id) {

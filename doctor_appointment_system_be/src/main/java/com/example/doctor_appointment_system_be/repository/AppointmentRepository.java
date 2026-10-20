@@ -49,11 +49,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "ORDER BY a.id DESC")
     List<Appointment> findAllDoctorAppointmentsHistory(@Param("userId") Long userId);
 
-    @Query("SELECT new com.example.doctor_appointment_system_be.dto.ChartDataDTO(a.timeSlot.date, COUNT(a)) " +
+    @Query("SELECT new com.example.doctor_appointment_system_be.dto.ChartDataDTO(CAST(a.createdAt AS LocalDate), COUNT(a)) " +
             "FROM Appointment a " +
-            "WHERE a.timeSlot.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY a.timeSlot.date " +
-            "ORDER BY a.timeSlot.date ASC")
+            "WHERE CAST(a.createdAt AS LocalDate) BETWEEN :startDate AND :endDate " +
+            "GROUP BY CAST(a.createdAt AS LocalDate) " +
+            "ORDER BY CAST(a.createdAt AS LocalDate) ASC")
     List<ChartDataDTO> getAppointmentCountsByDate(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

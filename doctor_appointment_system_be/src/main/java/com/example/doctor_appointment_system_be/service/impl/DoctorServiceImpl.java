@@ -189,12 +189,12 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor doctor = doctorRepository.findWithUserByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with user ID: " + userId));
 
-        if (!passwordEncoder.matches(dto.getOldPassword(), doctor.getUser().getPassword())){
-            throw new InvalidPasswordException("Old password incorrect");
-        }
-
         if (!dto.getConfirmPassword().equals(dto.getNewPassword())){
             throw new InvalidPasswordException("Passwords do not match");
+        }
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), doctor.getUser().getPassword())){
+            throw new InvalidPasswordException("Old password incorrect");
         }
 
         doctor.getUser().setPassword(passwordEncoder.encode(dto.getNewPassword()));
