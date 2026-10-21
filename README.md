@@ -8,7 +8,7 @@ It is built on **Clean Layered Architecture**, **stateless JWT security**, and *
 >
 > | Patient Portal | Doctor Portal | Admin Dashboard |
 > | :---: | :---: | :---: |
-> | ![Patient](docs/screenshots/patient.png) | ![Doctor](docs/screenshots/doctor.png) | ![Admin](docs/screenshots/admin.png) |
+> | ![Patient](doctor_appointment_system_be/docs/screenshots/patient.png) | ![Doctor](doctor_appointment_system_be/docs/screenshots/doctor.png) | ![Admin](doctor_appointment_system_be/docs/screenshots/admin.png) |
  
 ---
  
