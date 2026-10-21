@@ -223,33 +223,7 @@ doctor-appointment-system/
 ```
  
 ---
- 
-## 🗺 Roadmap
- 
-- [ ] Email / SMS appointment reminders
-- [ ] Online payment integration
-- [ ] Dockerized setup (`docker-compose`)
-- [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Integration tests with Testcontainers
----
- 
-## 🤝 Contributing
- 
-Contributions are welcome!
- 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit using [Conventional Commits](https://www.conventionalcommits.org/): `git commit -m "feat: add your feature"`
-4. Push the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
----
- 
-## 📄 License
- 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
- 
----
- 
+
 ## 👤 Author
  
 **Lahiru** — [@Lahiru075](https://github.com/Lahiru075)
