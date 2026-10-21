@@ -112,7 +112,7 @@ const DoctorAvailability = () => {
         try {
 
             if (!schedule.days.some(d => d.slots.length > 0)) {
-                alert("Error: Schedule is empty.");
+                showToast("Please add at least one slot for each day.");
                 return;
             }
 

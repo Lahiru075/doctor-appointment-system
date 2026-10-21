@@ -23,10 +23,8 @@ public class AuditLogController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponseDTO>>> getAllLogs() {
-        System.out.println("enw1");
-        List<AuditLogResponseDTO> logs = auditLogService.getAllLogs();
 
-        System.out.println("enw2");
+        List<AuditLogResponseDTO> logs = auditLogService.getAllLogs();
 
         ApiResponse<List<AuditLogResponseDTO>> response = ApiResponse.<List<AuditLogResponseDTO>>builder()
                 .success(true)
