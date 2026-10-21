@@ -97,30 +97,25 @@ CliniQ adheres to strict **Clean Layered Architecture** with unidirectional depe
 
 ---
 
-## 📊 Database Schema & Entity Model
+## 🔒 Role-Based Access Control (RBAC) & API Catalog
 
-```
-       ┌───────────────┐
-       │     users     │
-       └───────┬───────┘
-               │ 1:1
-       ┌───────┴───────┬────────────────────────┐
-       ▼               ▼                        ▼
-┌──────────────┐┌──────────────┐         ┌──────────────┐
-│   patients   ││   doctors    │◄──N:1───│specialization│
-└──────┬───────┘└──────┬───────┘         └──────────────┘
-       │               │
-       │ 1:N           │ 1:N
-       ▼               ▼
-┌──────────────────────────────┐         ┌──────────────┐
-│         appointments         │───1:1──►│  time_slots  │
-└──────┬───────────────┬───────┘         └──────────────┘
-       │ 1:1           │ 1:1
-       ▼               ▼
-┌──────────────┐┌──────────────┐         ┌──────────────┐
-│ prescriptions││   reviews    │         │  audit_logs  │
-└──────────────┘└──────────────┘         └──────────────┘
-```
+CliniQ implements strict role-based authorization ensuring endpoints are guarded by granular Spring Security filters:
+
+| Module | HTTP Method | Endpoint | Authorized Roles | Description |
+| :--- | :---: | :--- | :---: | :--- |
+| **Authentication** | `POST` | `/api/v1/auth/register` | `PUBLIC` | Patient account registration |
+| | `POST` | `/api/v1/auth/login` | `PUBLIC` | Authenticate and obtain JWT tokens |
+| | `POST` | `/api/v1/auth/refresh` | `PUBLIC` | Obtain new access token via refresh token |
+| **Patient Portal** | `GET` | `/api/v1/patient/doctors` | `PATIENT` | Search doctors by name & specialization |
+| | `POST` | `/api/v1/appointments/book` | `PATIENT` | Book a consultation time slot |
+| | `PUT` | `/api/v1/appointments/cancel/{id}` | `PATIENT` | Cancel appointment (24h advance constraint) |
+| | `POST` | `/api/v1/reviews` | `PATIENT` | Submit 1–5 star consultation review |
+| **Doctor Portal** | `POST` | `/api/v1/doctor/schedule/weekly` | `DOCTOR` | Bulk-generate weekly availability slots |
+| | `PUT` | `/api/v1/appointments/complete/{id}`| `DOCTOR` | Finalize consultation status |
+| | `POST` | `/api/v1/prescriptions` | `DOCTOR` | Issue electronic prescription & medications |
+| **Admin Command** | `GET` | `/api/v1/admin/dashboard/stats` | `ADMIN` | Retrieve real-time telemetry & 7-day trends |
+| | `GET` | `/api/v1/admin/audit-logs` | `ADMIN` | Query indexed system audit trails |
+| | `PUT` | `/api/v1/admin/doctors/{id}/status` | `ADMIN` | Toggle medical practitioner active status |
 
 ---
 
